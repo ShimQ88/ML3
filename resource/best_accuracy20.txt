@@ -1,0 +1,25 @@
+#k_fold_value, index, t_method, a_function, method_param, max_iter, class_count, accuracy
+0, 1, 0, 1, 0.000100, 900, 2, 0.489130 
+1, 1, 0, 1, 0.000100, 900, 2, 0.706522 
+2, 3, 0, 1, 0.000100, 1500, 2, 0.673913 
+
+
+#mean: 0.623188 
+#variance: 0.009163 
+#sta_dev: 0.095724 
+#Mean Square Error: 62 ± 10% 
+
+
+#Confusion Matrix
+#k=0
+#22, 24
+#26, 20
+
+#k=1
+#29, 17
+#16, 30
+
+#k=2
+#34, 12
+#18, 28
+
