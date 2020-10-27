@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
+#include <bits/stdc++.h> 
 //namespace
 using namespace cv;
 using namespace std;

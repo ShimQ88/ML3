@@ -152,13 +152,15 @@ int main(int argc, char *argv[]){
             index_save << to_string(terminate_value);
             index_save.close();    
             
-            exit(1);
+            // exit(1);
+            return 0;
         }else if(strcmp(argv[i],"-filtering_v2") == 0){
             ROI_SUCCESS test;
             test.Main_Process();
-            // ~test();
+            
             // cout<<"done2"<<endl;
-            exit(10);    
+            // exit(10);
+            return 0;    
         }else if(strcmp(argv[i],"-yolo") == 0){
             ifstream file_yolo("ROI_success/yolo/yolo.txt");//This is using for not overwrite
             ifstream file_contour("ROI_success/contour/contour.txt");//This is using for not overwrite

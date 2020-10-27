@@ -2021,6 +2021,13 @@ int run_kuwahara(int argc,char *argv[]){
 			int y_value=(large_y-small_y-small_y);
 			int trigger=x_value+y_value;
 			
+			if( trigger>400 ){
+				// auto time = std::chrono::system_clock::now();
+				// string time_str=to_string(time);  
+				imwrite("2.jpg",image1);
+			}
+
+
 			/*Debugging for values*/
 			// cout<<"1.small_x:"<<small_x<<endl;
 			// cout<<"1.large_x:"<<large_x<<endl;
@@ -2029,163 +2036,163 @@ int run_kuwahara(int argc,char *argv[]){
 			/**********************/
 
 			/*Mean shift part*/
-			if( trigger>200 ){//trigger to work meanshift.(question1)
-				cout<<"mean shift working"<<endl;
-				namedWindow(window_detection_name);
-				namedWindow(window_capture_name);
-				createTrackbar("Low H", window_detection_name, &low_H, max_value_H, on_low_H_thresh_trackbar);
-			    createTrackbar("High H", window_detection_name, &high_H, max_value_H, on_high_H_thresh_trackbar);
-			    createTrackbar("Low S", window_detection_name, &low_S, max_value, on_low_S_thresh_trackbar);
-			    createTrackbar("High S", window_detection_name, &high_S, max_value, on_high_S_thresh_trackbar);
-			    createTrackbar("Low V", window_detection_name, &low_V, max_value, on_low_V_thresh_trackbar);
-			    createTrackbar("High V", window_detection_name, &high_V, max_value, on_high_V_thresh_trackbar);
-   				Mat frame, frame_HSV, frame_threshold;
-				// cout<<"1.small_x:"<<small_x<<endl;
-				// cout<<"1.large_x:"<<large_x<<endl;
-				// cout<<"2.small_y"<<small_y<<endl;
-				// cout<<"2.large_y"<<large_y<<endl;
-				Rect track_window(small_x, small_y, large_x-small_x, large_y-small_y);
-				// rectangle(image2,track_window,Scalar(0,255,0),3);
-				float range_1[] = {0, 90};
-				// float range_2[] = {0, 90};
-				// float range_3[] = {0, 90};
-			    const float* range[] = {range_1};
-			    Mat roi_hist;
-			    Mat roi, mask;
+			// if( trigger>200 ){//trigger to work meanshift.(question1)
+			// 	cout<<"mean shift working"<<endl;
+			// 	namedWindow(window_detection_name);
+			// 	namedWindow(window_capture_name);
+			// 	createTrackbar("Low H", window_detection_name, &low_H, max_value_H, on_low_H_thresh_trackbar);
+			//     createTrackbar("High H", window_detection_name, &high_H, max_value_H, on_high_H_thresh_trackbar);
+			//     createTrackbar("Low S", window_detection_name, &low_S, max_value, on_low_S_thresh_trackbar);
+			//     createTrackbar("High S", window_detection_name, &high_S, max_value, on_high_S_thresh_trackbar);
+			//     createTrackbar("Low V", window_detection_name, &low_V, max_value, on_low_V_thresh_trackbar);
+			//     createTrackbar("High V", window_detection_name, &high_V, max_value, on_high_V_thresh_trackbar);
+   // 				Mat frame, frame_HSV, frame_threshold;
+			// 	// cout<<"1.small_x:"<<small_x<<endl;
+			// 	// cout<<"1.large_x:"<<large_x<<endl;
+			// 	// cout<<"2.small_y"<<small_y<<endl;
+			// 	// cout<<"2.large_y"<<large_y<<endl;
+			// 	Rect track_window(small_x, small_y, large_x-small_x, large_y-small_y);
+			// 	// rectangle(image2,track_window,Scalar(0,255,0),3);
+			// 	float range_1[] = {0, 90};
+			// 	// float range_2[] = {0, 90};
+			// 	// float range_3[] = {0, 90};
+			//     const float* range[] = {range_1};
+			//     Mat roi_hist;
+			//     Mat roi, mask;
 
-			    Mat hsv;
-			    cvtColor(image2, frame_HSV, COLOR_BGR2HSV);
-			    cvtColor(image2, hsv, COLOR_BGR2HSV);
-			    // inRange(frame_HSV, Scalar(low_H, low_S, low_V), Scalar(high_H, high_S, high_V), frame_threshold);
+			//     Mat hsv;
+			//     cvtColor(image2, frame_HSV, COLOR_BGR2HSV);
+			//     cvtColor(image2, hsv, COLOR_BGR2HSV);
+			//     // inRange(frame_HSV, Scalar(low_H, low_S, low_V), Scalar(high_H, high_S, high_V), frame_threshold);
 
 
-				Mat mask1, mask2;
-			    // inRange(hsv, Scalar(161, 155, 84), Scalar(179, 255, 255), mask1);
-			    // inRange(hsv, Scalar(179, 255, 255), Scalar(180, 255, 255), mask2);
-			    // inRange(hsv, Scalar(94, 80, 2), Scalar(126, 255, 255), mask);
-			    // mask = mask1 + mask2;
-				// mask=zeros(image2.size(),IMREAD_GRAYSCALE);
+			// 	Mat mask1, mask2;
+			//     // inRange(hsv, Scalar(161, 155, 84), Scalar(179, 255, 255), mask1);
+			//     // inRange(hsv, Scalar(179, 255, 255), Scalar(180, 255, 255), mask2);
+			//     // inRange(hsv, Scalar(94, 80, 2), Scalar(126, 255, 255), mask);
+			//     // mask = mask1 + mask2;
+			// 	// mask=zeros(image2.size(),IMREAD_GRAYSCALE);
 
-			    // Mat mask;
-			    roi = image2(track_window);
-			    // roi = image2(window);
-			    int histSize[] = {180};
-			    int channels[] = {0};
-			    // calcHist(&image2, 1, channels, mask, roi_hist, 1, histSize, range);
-			    calcHist(&hsv, 1, channels, mask, roi_hist, 1, histSize, range);
-			    normalize(roi_hist, roi_hist, 0, 255, NORM_MINMAX);
-			    TermCriteria term_crit(TermCriteria::EPS | TermCriteria::COUNT, 100, 1);
-				int k=0;
-				while(1){
-					k++;
-					system_clock::time_point start = system_clock::now();//start clock
-					Mat hsv1, dst;
-			        cap >> image2;
-			        if (image2.empty())
-			            break;
-			        cvtColor(image2, hsv, COLOR_BGR2HSV);
-			        // calcBackProject(&image2, 1, channels, roi_hist, dst, range);
-			        calcBackProject(&hsv, 1, channels, roi_hist, dst, range);
+			//     // Mat mask;
+			//     roi = image2(track_window);
+			//     // roi = image2(window);
+			//     int histSize[] = {180};
+			//     int channels[] = {0};
+			//     // calcHist(&image2, 1, channels, mask, roi_hist, 1, histSize, range);
+			//     calcHist(&hsv, 1, channels, mask, roi_hist, 1, histSize, range);
+			//     normalize(roi_hist, roi_hist, 0, 255, NORM_MINMAX);
+			//     TermCriteria term_crit(TermCriteria::EPS | TermCriteria::COUNT, 100, 1);
+			// 	int k=0;
+			// 	while(1){
+			// 		k++;
+			// 		system_clock::time_point start = system_clock::now();//start clock
+			// 		Mat hsv1, dst;
+			//         cap >> image2;
+			//         if (image2.empty())
+			//             break;
+			//         cvtColor(image2, hsv, COLOR_BGR2HSV);
+			//         // calcBackProject(&image2, 1, channels, roi_hist, dst, range);
+			//         calcBackProject(&hsv, 1, channels, roi_hist, dst, range);
 			        
-			        // apply camshift to get the new location
-			        RotatedRect rot_rect = CamShift(dst, track_window, term_crit);
+			//         // apply camshift to get the new location
+			//         RotatedRect rot_rect = CamShift(dst, track_window, term_crit);
 			        
-			        // Draw it on image
-			        Point2f points[4];
-			        rot_rect.points(points);
-			        int loop_breaker=0;
+			//         // Draw it on image
+			//         Point2f points[4];
+			//         rot_rect.points(points);
+			//         int loop_breaker=0;
 
-			        //find smallest point 
-			        Point2f pt_small,pt_large;
-			        pt_small.x=9999;
-			        pt_small.y=9999;
-			        pt_large.x=-9999;
-			        pt_large.y=-9999;
+			//         //find smallest point 
+			//         Point2f pt_small,pt_large;
+			//         pt_small.x=9999;
+			//         pt_small.y=9999;
+			//         pt_large.x=-9999;
+			//         pt_large.y=-9999;
 
-			        for (int i = 0; i < 4; i++){
-			            // line(image2, points[i], points[(i+1)%4], 255, 2);
-			            line(hsv, points[i], points[(i+1)%4], 255, 2);
-			            if((points[i].x<0)||(points[i].x>640)||(points[i].y<0)||(points[i].y>480)){
-			            	loop_breaker++;
-			            }
-			            cout<<"P"<<i<<": x,y: "<<points[i].x<<", "<<points[i].y<<endl;
+			//         for (int i = 0; i < 4; i++){
+			//             // line(image2, points[i], points[(i+1)%4], 255, 2);
+			//             line(hsv, points[i], points[(i+1)%4], 255, 2);
+			//             if((points[i].x<0)||(points[i].x>640)||(points[i].y<0)||(points[i].y>480)){
+			//             	loop_breaker++;
+			//             }
+			//             cout<<"P"<<i<<": x,y: "<<points[i].x<<", "<<points[i].y<<endl;
 
-			            if(points[i].x<pt_small.x){
-			            	pt_small.x=points[i].x;
-			            }
+			//             if(points[i].x<pt_small.x){
+			//             	pt_small.x=points[i].x;
+			//             }
 
-			            if(points[i].y<pt_small.y){
-			            	pt_small.y=points[i].y;
-			            }
+			//             if(points[i].y<pt_small.y){
+			//             	pt_small.y=points[i].y;
+			//             }
 
-			            if(points[i].x>pt_large.x){
-			            	pt_large.x=points[i].x;
-			            }
+			//             if(points[i].x>pt_large.x){
+			//             	pt_large.x=points[i].x;
+			//             }
 
-			            if(points[i].y>pt_large.y){
-			            	pt_large.y=points[i].y;
-			            }
+			//             if(points[i].y>pt_large.y){
+			//             	pt_large.y=points[i].y;
+			//             }
 
-			        }
-			        // Rect t_rec(points[3].x,points[3].y,points[1].x-points[3].x,points[1].y-points[3].y);
-			        Rect t_rec(pt_small.x, pt_small.y, pt_large.x-pt_small.x, pt_large.y-pt_small.y);
+			//         }
+			//         // Rect t_rec(points[3].x,points[3].y,points[1].x-points[3].x,points[1].y-points[3].y);
+			//         Rect t_rec(pt_small.x, pt_small.y, pt_large.x-pt_small.x, pt_large.y-pt_small.y);
 			        
-			        // rectangle(image2,t_rec,Scalar(0,255,0),3);
-			        rectangle(hsv,t_rec,Scalar(0,255,0),3);
+			//         // rectangle(image2,t_rec,Scalar(0,255,0),3);
+			//         rectangle(hsv,t_rec,Scalar(0,255,0),3);
 
-			        cout<<"small"<<": x,y: "<<pt_small.x<<", "<<pt_small.y<<endl;
-			        cout<<"large"<<": x,y: "<<pt_large.x<<", "<<pt_large.y<<endl;
+			//         cout<<"small"<<": x,y: "<<pt_small.x<<", "<<pt_small.y<<endl;
+			//         cout<<"large"<<": x,y: "<<pt_large.x<<", "<<pt_large.y<<endl;
 			        
-			        Point center_of_rect = (t_rec.br() + t_rec.tl())*0.5;
+			//         Point center_of_rect = (t_rec.br() + t_rec.tl())*0.5;
 
 			        
 
-    				// circle(image2,center_of_rect,3,Scalar(0,0,255));
-    				circle(hsv,center_of_rect,3,Scalar(0,0,255));
+   //  				// circle(image2,center_of_rect,3,Scalar(0,0,255));
+   //  				circle(hsv,center_of_rect,3,Scalar(0,0,255));
 
-			        // if(loop_breaker>=){//breaking rule (question2)
-			        // 	break;
-			        // }
+			//         // if(loop_breaker>=){//breaking rule (question2)
+			//         // 	break;
+			//         // }
 			     
-			        string directory_name="captured_image/"+to_string(k)+".jpg";
-			        string file_name="captured_image/"+to_string(k)+".txt";
+			//         string directory_name="captured_image/"+to_string(k)+".jpg";
+			//         string file_name="captured_image/"+to_string(k)+".txt";
 
-			        float file_width=abs(points[2].x-points[0].x)/cap_width;
-			        float file_height=abs(points[2].y-points[0].y)/cap_height;
-			        float file_x=center_of_rect.x/cap_width;
-			        float file_y=center_of_rect.y/cap_height;
-			        string file_content="0, "+to_string(file_x)+", "
-			        +to_string(file_y)+", "+to_string(file_width)+", "
-			        +to_string(file_height)+'\n';
+			//         float file_width=abs(points[2].x-points[0].x)/cap_width;
+			//         float file_height=abs(points[2].y-points[0].y)/cap_height;
+			//         float file_x=center_of_rect.x/cap_width;
+			//         float file_y=center_of_rect.y/cap_height;
+			//         string file_content="0, "+to_string(file_x)+", "
+			//         +to_string(file_y)+", "+to_string(file_width)+", "
+			//         +to_string(file_height)+'\n';
 
-			        ofstream myfile (file_name);
-					if (myfile.is_open())
-					{
-						myfile << file_content;
-					    myfile.close();
-					}
+			//         ofstream myfile (file_name);
+			// 		if (myfile.is_open())
+			// 		{
+			// 			myfile << file_content;
+			// 		    myfile.close();
+			// 		}
 
-			        imshow("object following window", image2);
-			        // imshow("object following window", hsv1);
-			        imshow("hsv", hsv);
-			        // imshow("mask2", mask2);
-			        // imshow("mask1", mask1);
-			        // imshow("mask", mask);
-			        imshow("dst of object", dst);
-			        // cvtColor(image2, frame_HSV, COLOR_BGR2HSV);
-			        // inRange(frame_HSV, Scalar(low_H, low_S, low_V), Scalar(high_H, high_S, high_V), frame_threshold);
-			        // imshow(window_detection_name, frame_threshold);
-			        // imshow("hellow world", frame_HSV);
-			        // imwrite(directory_name, image2);//write
-			        // imshow("roi", roi);
+			//         imshow("object following window", image2);
+			//         // imshow("object following window", hsv1);
+			//         imshow("hsv", hsv);
+			//         // imshow("mask2", mask2);
+			//         // imshow("mask1", mask1);
+			//         // imshow("mask", mask);
+			//         imshow("dst of object", dst);
+			//         // cvtColor(image2, frame_HSV, COLOR_BGR2HSV);
+			//         // inRange(frame_HSV, Scalar(low_H, low_S, low_V), Scalar(high_H, high_S, high_V), frame_threshold);
+			//         // imshow(window_detection_name, frame_threshold);
+			//         // imshow("hellow world", frame_HSV);
+			//         // imwrite(directory_name, image2);//write
+			//         // imshow("roi", roi);
 			        
-			        key=waitKey(1);
-			        system_clock::time_point end = system_clock::now();
-			       	double seconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-			     	fps = 1000000/seconds;
-			     	cout << "frames " << fps << " seconds " << seconds << endl;
-				}
-			}
+			//         key=waitKey(1);
+			//         system_clock::time_point end = system_clock::now();
+			//        	double seconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+			//      	fps = 1000000/seconds;
+			//      	cout << "frames " << fps << " seconds " << seconds << endl;
+			// 	}
+			// }
 			/**********************/
 
 			Grey_to_Color(image2,temp_window,final_output);

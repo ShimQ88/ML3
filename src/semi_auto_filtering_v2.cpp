@@ -17,6 +17,8 @@ ROI_SUCCESS::~ROI_SUCCESS(){
     delete[] image_contour;
     delete[] image_original;
     delete[] file_read;
+    cout<<"Deconstruction called"<<endl;
+    // getchar();
 }
 
 bool ROI_SUCCESS::Creating_Root_Directory(){
@@ -90,6 +92,7 @@ void ROI_SUCCESS::Main_Process(){
         index_save.open("ROI_success/index.txt");
         index_save<<to_string(++idx);
         index_save.close();
+
     }
     if(decision.compare("y")==0){//I made this one owing to avoiding mistake input
         Read_Info_Contour_Yolo();
@@ -128,8 +131,8 @@ string ROI_SUCCESS::Decision_Part(){
 
 bool ROI_SUCCESS::Determine_final_path_contour(){
     ////determine path
-    parent_path_contour=new char[20];
-    parent_path_ori_img=new char[20];
+    parent_path_contour=new char[30];
+    parent_path_ori_img=new char[30];
     strcpy(parent_path_contour, "ROI_images");    
     strcat(parent_path_contour,"/Contour/");
 
@@ -226,7 +229,8 @@ void ROI_SUCCESS::Splite_Data_Yolo_and_Contour_v3(string resource_file, string* 
     delimiter = contour_line.find(';');
 
     *img_name=contour_line.substr(0,delimiter);
-    // cout<<"*img_name: "<<*img_name<<endl;
+    cout<<"*img_name: "<<*img_name<<endl;
+    // cout<<"contour_line: "<<contour_line<<endl;
     // getchar();
 
     contour_line=contour_line.substr(delimiter+1);
@@ -252,21 +256,36 @@ void ROI_SUCCESS::Splite_Data_Yolo_and_Contour_v3(string resource_file, string* 
 
 void ROI_SUCCESS::Read_Info_Contour_Yolo(){
     string contour_file="/contour_"+to_string(idx)+".txt";
-    char contour_name_char[contour_file.length()];
+    char contour_name_char[contour_file.length()+2];
     for(int j=0;j<sizeof(contour_name_char);j++){
         contour_name_char[j]=contour_file[j];
     }
 
     strcat(parent_path_contour,contour_name_char);
+
+
+    // int parent_path_contour_size = sizeof(parent_path_contour) / sizeof(char); 
+    // string myfile_path="";
+    // for (int j=0; j<parent_path_contour_size; j++) { 
+    //     myfile_path = myfile_path + parent_path_contour[j]; 
+    // } 
+    
     cout<<"sub_path_contour: "<<parent_path_contour<<endl;
-    ifstream myfile( parent_path_contour );
+    ifstream myfile;
+    // string p="ROI_images/Contour/207/contour_207.txt";
+    // myfile.open(parent_path_contour);
+    myfile.open(parent_path_contour);
+    // ifstream myfile( contour_name_char );
+    // ifstream myfile( "ROI_images/Contour/200/contour_200.txt" );
+    cout<<"parent_path_contour: "<<parent_path_contour<<endl;
     file_read=new string[glob_contour.gl_pathc];
     
     
     int ind=0;
     if(myfile){
         while(getline(myfile, file_read[ind])){
-            // cout<<"ind: "<<ind<<endl;
+            // cout<<"file_read[ind]: "<<file_read[ind]<<endl;
+
             ind++;
         }
     }
@@ -312,9 +331,10 @@ void ROI_SUCCESS::Save_Info_of_Selected_Imgs(){
         delimiter = selected_idx.find(',');
         string temp_str = selected_idx.substr(0, delimiter);
         selected_idx = selected_idx.substr(delimiter+1);
-        // cout<<"index: "<<temp_str<<endl;
         
-        int temp_i=stoi(temp_str);                
+        
+        int temp_i=stoi(temp_str);       
+        cout<<"file_read[temp_i]: "<<file_read[temp_i]<<endl;         
         
         Splite_Data_Yolo_and_Contour_v3(file_read[temp_i],&yolo_data, &contour_data, &name_ori_img);
         

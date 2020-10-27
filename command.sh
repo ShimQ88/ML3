@@ -17,9 +17,10 @@ echo $total
 
 total=`expr $total - 5`
 #loop work until index number over total number of item in directory
-while [ $value -le $total ]
+while [ $value != $total ]
 do
 	
 	./main -detect $path_of_file $value
 	value=`cat ROI_images/index.txt`
 done
+echo "Terminate bash programming"
