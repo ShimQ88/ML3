@@ -1866,7 +1866,7 @@ int run_kuwahara(int argc,char *argv[]){
 
 		/*Camera setup*/
 		VideoCapture cap;
-	  	cap.open(0);
+	  	cap.open(2);
 	 	if (!cap.isOpened()){
 	        cout << "Failed to open camera" << endl;
 	        return 0;
@@ -2001,31 +2001,78 @@ int run_kuwahara(int argc,char *argv[]){
 			output=gray_image1-gray_image2;
 			/********************************/
 			
+
+
+
 			/***Cropping Object by outline of object***/
 			Mat temp_window=Mat::zeros(image2.size(),IMREAD_GRAYSCALE);//gray case
-			Image_stitching(gray_image2,output,temp_window);
+			// Image_stitching(gray_image2,output,temp_window);
+
+			thresholding_image(output, 50,true,0);
+			// cv::threshold(output, output, 0, 255, THRESH_BINARY | THRESH_OTSU);
+			// median_filter(subtracted_frame,subtracted_frame,7);
+			medianBlur(output,output,7);
 
 			
 
 			/******************************************/
+			Point* p_start_roi_window;
+			Point* p_end_roi_window;
+			p_start_roi_window=new Point[200];//approx numb
+			p_end_roi_window=new Point[200];//approx numb
+			// Mat blob_window;
+			Mat blob_window=Mat::zeros(image2.size(),CV_8UC3);//gray case
+
+			int count_numb=blob(output, blob_window, p_start_roi_window, p_end_roi_window);
+			
+			//filename
+			time_t rawtime;
+			struct tm * timeinfo;
+			char buffer[80];
+
+			time (&rawtime);
+			timeinfo = localtime(&rawtime);
+
+			strftime(buffer,sizeof(buffer),"%H:%M:%S;%d:%m:%Y",timeinfo);
+			string str(buffer);
+			cout << str;
+			string file_name;
+			file_name="capture/";
+			file_name=file_name+str+".jpg";
+			//filename end
+
+			// cout<<"THis is point 2-1"<<endl;
+			
+
+			Point p_center_of_object=draw_rect_box(blob_window, p_start_roi_window, p_end_roi_window, 200);
+			int cropping_size=determine_frame_size(blob_window,p_center_of_object,20,20);
+
+			cout<<"cropping size: "<<cropping_size<<endl;
+			if((count_numb==-100)||(cropping_size>100)){
+				// cout<<"Skip: too much blob"<<endl;
+				// is_initialize_success=false;
+				// return;
+				imwrite(file_name,image2);
+				// continue;
+			}//segmental fault
 
 			/***ROI Section***/
-			int small_x,small_y,large_x,large_y;//size of
-			Determining_ROI_Size(temp_window,&small_x,&small_y,&large_x,&large_y);
-			// median_filter(temp_window,temp_window,15);
-			Rect window(small_x, small_y, large_x-small_x, large_y-small_y); // simply hardcoded the values
-			rectangle(final_output, window, Scalar(0, 255, 255), 2);
+			// int small_x,small_y,large_x,large_y;//size of
+			// Determining_ROI_Size(temp_window,&small_x,&small_y,&large_x,&large_y);
+			// // median_filter(temp_window,temp_window,15);
+			// Rect window(small_x, small_y, large_x-small_x, large_y-small_y); // simply hardcoded the values
+			// rectangle(final_output, window, Scalar(0, 255, 255), 2);
 				
 
-			int x_value=(large_x-small_x-small_x);
-			int y_value=(large_y-small_y-small_y);
-			int trigger=x_value+y_value;
+			// int x_value=(large_x-small_x-small_x);
+			// int y_value=(large_y-small_y-small_y);
+			// int trigger=x_value+y_value;
 			
-			if( trigger>400 ){
-				// auto time = std::chrono::system_clock::now();
-				// string time_str=to_string(time);  
-				imwrite("2.jpg",image1);
-			}
+			// if( trigger>400 ){
+			// 	// auto time = std::chrono::system_clock::now();
+			// 	// string time_str=to_string(time);  
+			// 	// imwrite("2.jpg",image1);
+			// }
 
 
 			/*Debugging for values*/
@@ -2198,7 +2245,7 @@ int run_kuwahara(int argc,char *argv[]){
 			Grey_to_Color(image2,temp_window,final_output);
 	    	// imshow("temp_window" ,temp_window);
 	    	imshow("final_output" ,final_output);
-	    	// imshow("Gray_output" ,output);
+	    	imshow("blob_window" ,blob_window);
 
 	    	// imshow("image1" ,output1);
 	    	// imshow("image2" ,output2);

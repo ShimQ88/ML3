@@ -1,11 +1,11 @@
 # Makefile settings
-#headers = -I/usr/lib/include/ -I./include/
+# headers = -I/usr/lib/include/ -I./include/
 headers = -I/usr/local/include/opencv4 -I./include/
-libs = `pkg-config --cflags --libs opencv4`
-#libs = `pkg-config --cflags --libs opencv` 
+# libs = `pkg-config --cflags --libs opencv4`
+libs = `pkg-config --cflags --libs opencv4` 
 build = ./obj/
 src = ./src/
-detection=./src/detection/
+# detection=./src/detection/
 cc = g++
 
 # Example
