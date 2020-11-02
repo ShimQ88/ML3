@@ -1866,7 +1866,7 @@ int run_kuwahara(int argc,char *argv[]){
 
 		/*Camera setup*/
 		VideoCapture cap;
-	  	cap.open(2);
+	  	cap.open(0);
 	 	if (!cap.isOpened()){
 	        cout << "Failed to open camera" << endl;
 	        return 0;

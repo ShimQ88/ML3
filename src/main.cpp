@@ -35,6 +35,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "contour.h"
 #include "semi_auto_filtering_v2.h"
+#include "final_filtering.h"
 
 ///////////////////////////////
 
@@ -134,7 +135,7 @@ int main(int argc, char *argv[]){
             index_save.open ("ROI_images/index.txt");
             index_save << to_string(terminate_value);
             index_save.close();
-            exit(1);
+            exit(10);
             // return terminate_value;
 
         }else if(strcmp(argv[i],"-filtering") == 0){
@@ -152,15 +153,24 @@ int main(int argc, char *argv[]){
             index_save << to_string(terminate_value);
             index_save.close();    
             
-            // exit(1);
-            return 0;
+            exit(10);
+            // return 0;
         }else if(strcmp(argv[i],"-filtering_v2") == 0){
             ROI_SUCCESS test;
             test.Main_Process();
             
             // cout<<"done2"<<endl;
-            // exit(10);
-            return 0;    
+            exit(10);
+            // return 0;
+        }else if(strcmp(argv[i],"-final_filtering") == 0){
+            
+            The_LAST_FILTERING test;
+
+            test.Main_Process();
+            
+            cout<<"done2"<<endl;
+            exit(10);
+            // return 0;    
         }else if(strcmp(argv[i],"-yolo") == 0){
             ifstream file_yolo("ROI_success/yolo/yolo.txt");//This is using for not overwrite
             ifstream file_contour("ROI_success/contour/contour.txt");//This is using for not overwrite
