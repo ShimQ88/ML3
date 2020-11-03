@@ -141,6 +141,90 @@ void help(int ntrain_samples, int ntest_samples,int ml_technique){
 
 
 //main_ml(){}
+void Test(string input_file_name, string output_file_name){
+    ifstream input_file(input_file_name);
+    ofstream output_file(output_file_name);
+    string read_line;
+
+    int delimiter=0;
+    getline(input_file,read_line);
+    if((input_file.is_open())&&(output_file.is_open())){
+        while(getline(input_file, read_line)){
+            // strinh output_string;
+            int delimiter=0;
+            string temp_read_line=read_line;//copy string
+
+            while(delimiter!=-1){
+                delimiter = temp_read_line.find(',');
+                string splited_value=temp_read_line.substr(0,delimiter);
+                // cout<<"splited_value: "<<splited_value<<endl;
+                // cout<<"splited_value.length(): "<<splited_value.length()<<endl;
+                char str[splited_value.length()];
+                bool is_digit=true;
+                for (int i=0; i<splited_value.length(); i++){
+                    str[i]=splited_value[i];
+                    // cout<<"str[i]:"<<str[i]<<endl;
+                    // getchar();
+                    if((isdigit(str[i])==true)||(str[i]=='.')){
+                        
+                    }else{
+                        cout<<"this is not digit"<<endl;
+                        is_digit=false;
+                        break;
+                    }
+                }
+                if(is_digit==true){
+                    if(delimiter==-1){
+                        output_file<<splited_value;
+                    }else{
+                        output_file<<splited_value;
+                        output_file<<',';    
+                    }
+                    
+                }else{
+                    // output_file<<splited_value;
+                    // output_file<<',';
+                    //doing nothing
+                }
+                temp_read_line = temp_read_line.substr(delimiter+1);//delete copied data
+            }
+            output_file<<"\n";
+        }
+    }
+
+    
+    // string temp_read_line=read_line;
+    // delimiter = temp_read_line.find(',');
+    // temp_read_line = temp_read_line.substr(delimiter+1);//ignore the class number
+    
+    // delimiter = temp_read_line.find(',');
+    // string img_name_from_file=temp_read_line.substr(0,delimiter);
+    // cout<<"img_name_from_file: "<<img_name_from_file<<endl;
+    // char str[img_name_from_file.length()];
+
+    // cout << "The digit in the string are:" << endl;
+    // bool is_digit=true;
+    // for (int i=0; i<strlen(str); i++){
+    //     str[i]=img_name_from_file[i];
+    //     if (!isdigit(str[i])){
+    //         is_digit=false;
+    //         break;
+    //     }
+    // }
+    
+
+
+
+    // if (input_txt.is_open()){
+    //     while(getline(input_txt,line)){
+    //         cout << line << '\n';
+    //     }
+
+    //     myfile.close();
+    // }
+    input_file.close();
+    output_file.close();
+}
 bool
 load_and_save_ml( const string& data_filename,
                       const string& filename_to_save,
@@ -151,6 +235,9 @@ load_and_save_ml( const string& data_filename,
     /*infomation 
        ml_technique= 1.neural_network 2.ada_boost 3.random_forest 
     */
+    Test("Final_dataset/contour.data","Final_dataset/contour_name_removed.data");
+    cout<<"hello work"<<endl;
+    getchar();
     Mat data;
     Mat responses;
     int numb_of_data_cols=Count_Column_Numb(data_filename);
