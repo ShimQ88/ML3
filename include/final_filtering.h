@@ -14,7 +14,7 @@
 //namespace
 using namespace cv;
 using namespace std;
-#define the_number_of_file_on_grid 100
+int the_number_of_file_on_grid=100;
 
 class The_LAST_FILTERING{
 private:
@@ -22,10 +22,10 @@ private:
     int idx;
     int the_number_of_selected_idx;
     int *the_list_of_selected_idx;
-    Mat img_contour[the_number_of_file_on_grid];
-    Mat img_yolo[the_number_of_file_on_grid];
-    string file_info[the_number_of_file_on_grid];
-    string file_info_name[the_number_of_file_on_grid];
+    Mat *img_contour;
+    Mat *img_yolo;
+    string *file_info;
+    string *file_info_name;
     string folder_name_root;
     string folder_name_contour;
     string folder_name_yolo;
@@ -51,6 +51,7 @@ public:
     void Save_Yolo(string img_name, string yolo_data);
     bool Name_Check(string temp_ori_name, string name_ori_img);
     void Save_index_to_int(string input_str, int input_int[]);
+    void Save_Index(int index);
     ////filtering version 2
     
 };

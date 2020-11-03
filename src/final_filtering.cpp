@@ -7,11 +7,17 @@ The_LAST_FILTERING::The_LAST_FILTERING(){
 
     Creating_Root_Directory();
     Creating_Child_Directories();
+
+    
     cout<<"Construct called"<<endl;
 }
 
 The_LAST_FILTERING::~The_LAST_FILTERING(){
     delete[] the_list_of_selected_idx;
+    delete[] img_contour;
+    delete[] img_yolo;
+    delete[] file_info;
+    delete[] file_info_name;
     cout<<"Deconstruction called"<<endl;
 }
 
@@ -70,7 +76,8 @@ void The_LAST_FILTERING::Read_List_of_File_from_Directories(){
     char path_contour_char[path_contour.length()+1];
     
     for (int j=0; j<sizeof(path_contour_char);j++) { 
-        path_contour_char[j] = path_contour[j];   
+        path_contour_char[j] = path_contour[j]; 
+        // cout<<"path_contour_char[j]:"<<path_contour_char[j]<<endl;  
     }
 
     char path_yolo_char[path_yolo.length()+1];
@@ -78,20 +85,43 @@ void The_LAST_FILTERING::Read_List_of_File_from_Directories(){
     for (int j=0; j<sizeof(path_yolo_char);j++) { 
         path_yolo_char[j] = path_yolo[j]; 
     } 
+    cout<<"path_contour_char: "<<path_contour_char<<endl;
+    cout<<"path_yolo_char: "<<path_yolo_char<<endl;
 
     glob(path_contour_char,GLOB_TILDE,NULL,&glob_contour);
     glob(path_yolo_char,GLOB_TILDE,NULL,&glob_yolo);
+    // cout<<"glob_yolo.gl_pathv[0]:"<<glob_yolo.gl_pathv[0]<<endl;
+    // cout<<"glob_contour.gl_pathc22: "<<glob_contour.gl_pathc<<endl;
 }
 
 void The_LAST_FILTERING::Main_Process(){
     idx=Determine_Process_Index_Numb();
     Read_List_of_File_from_Directories();
     int validation_code=Validate_Check(idx);//This is only work when the index number is 0
+    cout<<"glob_contour.gl_pathc: "<<glob_contour.gl_pathc<<endl;
     //code  0: Success the process
     //code  1: The index number is not 0, it mean already finished scanning
     //code -1: fail to load the file of ROI_success/yolo_contour.txt
     //code -2: fail to create the file of Final_dataset/yolo_contour.txt
     cout<<"validation_code: "<<validation_code<<endl;
+    int the_number_of_files_contour=glob_contour.gl_pathc;
+    int the_number_of_files_yolo=glob_yolo.gl_pathc;
+
+    // cout<<"the_number_of_file_on_grid: "<<the_number_of_file_on_grid<<endl;
+    cout<<"the_number_of_files_contour: "<<the_number_of_files_contour<<endl;
+
+    if((the_number_of_files_contour<the_number_of_file_on_grid+idx)||
+        (the_number_of_files_yolo<the_number_of_file_on_grid+idx)){
+        the_number_of_file_on_grid=the_number_of_files_contour%100;
+        // cout<<"the_number_of_file_on_grid: "<<the_number_of_file_on_grid<<endl;
+        // cout<<"the_number_of_files_contour: "<<the_number_of_files_contour<<endl;
+        // getchar();
+    }
+    img_contour=new Mat[the_number_of_file_on_grid];
+    img_yolo=new Mat[the_number_of_file_on_grid];
+    file_info=new string[the_number_of_file_on_grid];
+    file_info_name=new string[the_number_of_file_on_grid];
+
     Load_Mat_with_Index();
     Merge_Multi_Mats_to_Single_Mat_v2(img_contour,the_number_of_file_on_grid);
     string decision=Decision_Part();
@@ -99,12 +129,16 @@ void The_LAST_FILTERING::Main_Process(){
         cout<<"input Error try again: Press enter"<<endl;
         the_list_of_selected_idx=new int[1];
         return;
+    }else if(decision.compare("skip")==0){
+        cout<<"You press skip"<<endl;
+        
+         Save_Info_of_Selected_Imgs();
+         return;
     }
 
     // cout<<"decision: "<<endl;
     the_number_of_selected_idx=Count_the_Number_of_Index(selected_idx);
-    // cout<<"the_number_of_selected_idx: "<<the_number_of_selected_idx<<endl;
-    // getchar();
+    
 
     the_list_of_selected_idx=new int[the_number_of_selected_idx];
     Save_index_to_int(selected_idx,the_list_of_selected_idx);
@@ -165,9 +199,9 @@ int The_LAST_FILTERING::Validate_Check(int index){
             int the_number_of_files_contour=glob_contour.gl_pathc;
             int the_number_of_files_yolo=glob_yolo.gl_pathc;
             int the_number_of_files;
-            cout<<"the_number_of_files_contour: "<<the_number_of_files_contour<<endl;
+            cout<<"the_number_of_files_contour111: "<<the_number_of_files_contour<<endl;
             cout<<"the_number_of_files_yolo: "<<the_number_of_files_yolo<<endl;
-            
+            // getchar();
             //determine the biggest number of folder.
             if(the_number_of_files_contour>=the_number_of_files_yolo){
                 the_number_of_files=the_number_of_files_contour;
@@ -493,12 +527,16 @@ void The_LAST_FILTERING::Save_Info_of_Selected_Imgs(){
     }
     file_out_contour.close();
     file_out_yolo.close();
+
+    Save_Index(idx);
+
+}
+void The_LAST_FILTERING::Save_Index(int index){
     string path_out_index="Final_dataset/index.txt";
-    // string path_out_mix="Final_dataset/final_yolo_contour.txt";
     ofstream file_out_index;
     
     file_out_index.open(path_out_index);//This is using for not overwrite
-    file_out_index<<to_string(idx+the_number_of_file_on_grid);
+    file_out_index<<to_string(index+the_number_of_file_on_grid);
     file_out_index.close();
 
 }
@@ -530,6 +568,7 @@ bool The_LAST_FILTERING::Name_Check(string temp_ori_name, string name_ori_img){
 int The_LAST_FILTERING::Count_the_Number_of_Index(string input_str){
     int delimiter=0;
     int index=0;
+    delimiter = input_str.find(',');
     while(delimiter!=-1){//this is count the number of comma
         delimiter = input_str.find(',');
         input_str = input_str.substr(delimiter+1);
