@@ -7,7 +7,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
-
+#include "opencv2/ml.hpp"
 // Opencv Headers
 #include "opencv2/core/core.hpp"
 #include "opencv2/ml/ml.hpp"
@@ -286,16 +286,16 @@ public:
     Machine_Learning_Data_Preparation *ml;
 	Parent_ML(){}
     ~Parent_ML();
-    void Main_Process(Machine_Learning_Data_Preparation *&prepared_data);
+    void Main_Process(Machine_Learning_Data_Preparation *&prepared_data,double p1, int p2, double p3);
     bool Calculate_standard_deviation();
 	float Accuracy_Calculation(const Mat& confusion_matrix);
 	Mat test_and_save_classifier(const Ptr<StatModel>& model,const Mat& data, const Mat& responses, int ntrain_samples, int rdelta, const string& filename_to_save, int ml_technique);
-	virtual void Intialize()=0;
+	virtual void Intialize(double p1, int p2, double p3)=0;
     virtual void Calculate_Result()=0;
     virtual void Return_Parameter(int index)=0;
 };
 
-void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data){
+void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data,double p1, int p2, double p3){
 	ml=prepared_data;
 	
 	confusion_matrix=new Mat[ml->k_fold_value];
@@ -304,7 +304,7 @@ void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data){
 	for(int i=0;i<ml->k_fold_value;i++){
 		result_buffer[i]=new char[50];
 	}	
-	Intialize();
+	Intialize(p1,p2,p3);
 	Calculate_Result();
 	Calculate_standard_deviation();
 }
@@ -352,6 +352,7 @@ Mat Parent_ML::test_and_save_classifier(const Ptr<StatModel>& model,
     Mat confusion_Matrix = Mat::zeros( 2, 2, CV_32S );
     
     // getchar();
+    int problem_val=0;
     for(int i=0; i<nsamples_all; i++){
         Mat sample = data.row(i);
         // int actual_value=responses.at<int>(i)-48;
@@ -365,15 +366,38 @@ Mat Parent_ML::test_and_save_classifier(const Ptr<StatModel>& model,
         // cout<<"actual_value: "<<responses.at<int>(i)<<endl;
         // getchar();
         // cout << "Actual_ha: " << responses.at<float>(i) << " row " << sample << endl;
+        cout << "Actual: " << actual_value << endl;
+        // cout<<"sample: "<<sample<<endl;
         float r = model->predict( sample );
-        // cout<<"predict: "<<r<<endl;
+        cout<<"predict: "<<r<<endl;
         // getchar();
         // cout << "Predict:  r = " << round(r) << endl;//rounding in case of random_forest
+        // getchar();
+        // int r_int=r;
         int r_int=(int)round(r);//random forrest case
+        // if( r_int == actual_value ){ //prediction is correct
         if( r_int == actual_value ){ //prediction is correct
             training_correct_predict++;
         }
         confusion_Matrix.at<int>(actual_value,r_int)=confusion_Matrix.at<int>(actual_value,r_int)+1;
+        // if(actual_value==0){
+        //     if(r>0.3){
+        //         cout<<"This "<<r<<" value is problem"<<endl;
+        //         problem_val++;
+        //     }else{
+
+        //     }
+        // }else{
+        //     if(r<0.7){
+        //         cout<<"This "<<r<<" value is problem"<<endl;
+        //         problem_val++;
+        //     }else{
+                
+        //     }
+        // }
+        
+
+
         // cout<<"confusion_Matrix: "<<confusion_Matrix<<endl;
         // getchar();
 
@@ -437,6 +461,8 @@ Mat Parent_ML::test_and_save_classifier(const Ptr<StatModel>& model,
 //     sample1 = (Mat_<float>(1,9) << 1.51131,13.69,3.2,1.81,72.81,1.76,5.43,1.19,0);//7
 //     r = model->predict( sample1 );
 //     cout << "Prediction: " << r << endl;
+    cout<<"problem_val: "<<problem_val<<endl;
+    getchar();
     return confusion_Matrix;
     
 /**********************************************************************/
@@ -549,7 +575,7 @@ template<class T>//base template before specialized
 class Child_ML : public Parent_ML{
 public:
 	// Machine_Learning *ml;
-	void Intialize(){cout<<"error choose different technique"<<endl;}
+	void Intialize(double p1, int p2, double p3){cout<<"error choose different technique"<<endl;}
 	void Return_Parameter(int index){cout<<"error"<<endl;}
 };
 
@@ -557,20 +583,25 @@ template<>
 class Child_ML<ANN_MLP> : public Parent_ML{
 public:
 	Ptr<ANN_MLP> *model;
-	int t_method = ANN_MLP::BACKPROP;//default
+	// int t_method = ANN_MLP::BACKPROP;//default
+    int t_method = ANN_MLP::BACKPROP;//default
+    // int t_method = 1;//default
     int a_function = ANN_MLP::SIGMOID_SYM;//default
-    double method_param=0.001;
-    int max_iter=10;
+    double method_param=0.1;
+    int max_iter=100;
 
     Child_ML(){}
   	~Child_ML(){delete model;}
-  	void Intialize();
+  	void Intialize(double p1, int p2, double p3);
   	void Calculate_Result();
   	void Return_Parameter(int index);
 };
 
-void Child_ML<ANN_MLP>::Intialize(){
-	cout<<"start initialize ANN"<<endl;
+void Child_ML<ANN_MLP>::Intialize(double p1, int p2, double p3){
+	// double p_method_param, int p_max_iter
+    method_param=p1;
+    max_iter=p2;
+    cout<<"start initialize ANN"<<endl;
 	// cout<<"ml->k_fold_value: "<<ml->k_fold_value<<endl;
 	model=new Ptr<ANN_MLP>[ml->k_fold_value];
 	
@@ -587,7 +618,7 @@ void Child_ML<ANN_MLP>::Intialize(){
         model[i]->setLayerSizes(layer_sizes);
         model[i]->setActivationFunction(a_function, 0, 0);
         // model->setActivationFunction(ANN_MLP::IDENTITY, 0, 0);
-        model[i]->setTermCriteria(ml->TC(max_iter,0));
+        model[i]->setTermCriteria(ml->TC(max_iter,method_param));
         model[i]->train(ml->tdata[i]);
 	}
 	cout << endl;
@@ -613,20 +644,20 @@ public:
 	Ptr<Boost> *model;
     Child_ML(){}
   	~Child_ML(){delete model;}
-	void Intialize();
+	void Intialize(double p1, int p2, double p3);
 	void Calculate_Result();
 	void Return_Parameter(int index);    
 };
 
-void Child_ML<Boost> ::Intialize(){
+void Child_ML<Boost> ::Intialize(double p1, int p2, double p3){
 	model=new Ptr<Boost>[ml->k_fold_value];
 	for(int i=0;i<ml->k_fold_value;i++){
 		cout << "iteration ("<<i<<") Training the classifier (may take a few minutes)...\n";
 		model[i] = Boost::create();
-	    model[i]->setBoostType(Boost::GENTLE);  //Gentle 0.5 and true
-	    model[i]->setWeakCount(51);       //the Gentle best=98;
-	    model[i]->setWeightTrimRate(0.63);//the Gentle best=0.83;
-	    model[i]->setMaxDepth(2);         //the Gentle best=2;
+	    model[i]->setBoostType(Boost::GENTLE);  //Gentle 0.5 and true{DISCRETE, REAL, LOGIT, GENTLE}
+	    model[i]->setWeakCount(100);       //the Gentle best=98;
+	    model[i]->setWeightTrimRate(80.83);//the Gentle best=0.83;
+	    model[i]->setMaxDepth(10);         //the Gentle best=2;
 	    model[i]->setUseSurrogates(false);
 	    model[i]->setPriors(Mat());	
   	// cout << "Training the classifier (may take a few minutes)...\n";  	
@@ -654,24 +685,26 @@ public:
 	Ptr<RTrees> *model;
     Child_ML(){}
   	~Child_ML(){delete model;}
-	void Intialize();
+	void Intialize(double p1, int p2, double p3);
 	void Calculate_Result();
 	void Return_Parameter(int index);
 };
 
-void Child_ML<RTrees>::Intialize(){
+void Child_ML<RTrees>::Intialize(double p1, int p2, double p3){
     // cout<<"THis is RF"<<endl;
     // getchar();
+    
 	model=new Ptr<RTrees>[ml->k_fold_value];
-
+    
 	for(int i=0;i<ml->k_fold_value;i++){
 		model[i] = RTrees::create();
-		model[i]->setMaxDepth(8);
-		model[i]->setMinSampleCount(9);
+		model[i]->setMaxDepth(12);
+		model[i]->setMinSampleCount(5);
 		model[i]->setRegressionAccuracy(0.01f);
 		model[i]->setUseSurrogates(false /* true */);
-		model[i]->setMaxCategories(15);
-		model[i]->setTermCriteria(ml->TC(300,0));
+		model[i]->setMaxCategories(2);
+		model[i]->setTermCriteria(ml->TC(100,0));
+        // model[i]->setTermCriteria(TermCriteria(TermCriteria::COUNT, 50, 0));
 		model[i]->train(ml->tdata[i]);
 	}
 	cout << endl;
@@ -679,6 +712,7 @@ void Child_ML<RTrees>::Intialize(){
 void Child_ML<RTrees>::Calculate_Result(){
 	for(int i=0;i<ml->k_fold_value;i++){
 		confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
+        // confusion_matrix[i]=test_and_save_classifier(model[i], ml->train_data[i], ml->train_responses_int[i], ml->ntrain_samples, 0, ml->filename_to_save,ml->ml_technique);
 		accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
 		sum_accuracy=sum_accuracy+accuracy[i];
 		Return_Parameter(i);
@@ -704,9 +738,9 @@ public:
 };
 
 Write_File::Write_File(string i_number_of_CE){
-	string file_path="resource/";
-	file_full_path=Create_file_path(file_path,"accuracy",i_number_of_CE);
-	file_the_best_full_path=Create_file_path(file_path,"Calculate_standard_deviation",i_number_of_CE);
+	string file_path="resource/rf/";
+	file_full_path=Create_file_path(file_path,"accuracy_",i_number_of_CE);
+	file_the_best_full_path=Create_file_path(file_path,"Calculate_standard_deviation_",i_number_of_CE);
 			
 	file.open(file_full_path);
 	file_the_best.open(file_the_best_full_path);

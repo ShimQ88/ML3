@@ -14,7 +14,7 @@
 //namespace
 using namespace cv;
 using namespace std;
-int the_number_of_file_on_grid=100;
+
 
 class The_LAST_FILTERING{
 private:
@@ -32,6 +32,7 @@ private:
     string selected_idx;
     Mat merged_img;
 public:
+    int the_number_of_file_on_grid=100;
     The_LAST_FILTERING();
     ~The_LAST_FILTERING();
     bool Creating_Root_Directory();

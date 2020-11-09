@@ -14,6 +14,8 @@ Train:
 
 ./main -save data/output.xml -data data/input.data
 
+./main -save Final_dataset/contour_out.xml -data Final_dataset/contour.data
+
 ./main -save data/resource10.xml -data data/resource10.data
 ./main -save data/resource15.xml -data data/resource15.data
 ./main -save data/resource20.xml -data data/resource20.data
@@ -25,11 +27,13 @@ Train:
 
 Test:
 
-./main -load data/output.xml -data data/input.data 
+./main -load data/output.xml -data data/input.data
+./main -load Final_dataset/contour_out.xml -data Final_dataset/contour.data
 
 Train and Test:
 
 ./main -tt data/output.xml -data data/input.data 
+./main -tt Final_dataset/contour_out.xml -data Final_dataset/contour.data
 
 
 #mean: 0.625731 

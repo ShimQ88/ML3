@@ -211,11 +211,13 @@ int main(int argc, char *argv[]){
         for(int i=0;i<numb_data;i++){
             // cout<<"multiple_data_filename[i]:"<<multiple_data_filename[i]<<endl;
             // cout<<"multiple_filename_to_save[i]:"<<multiple_mode_filename_to_save[i]<<endl;
-            load_and_save_ml(multiple_data_filename[i], multiple_filename_to_save[i], filename_to_load,0.85,TECHNIQUE);
+            // load_and_save_ml(multiple_data_filename[i], multiple_filename_to_save[i], filename_to_load,0.85,TECHNIQUE);
+            load_and_save_ml(multiple_data_filename[i], multiple_filename_to_save[i], filename_to_load,0.9,TECHNIQUE);
             
         }
     }else{
-        load_and_save_ml(data_filename, filename_to_save, filename_to_load,0.85,TECHNIQUE);    
+        // load_and_save_ml(data_filename, filename_to_save, filename_to_load,0.85,TECHNIQUE);
+        load_and_save_ml(data_filename, filename_to_save, filename_to_load,0.9,TECHNIQUE);    
     }
     
     

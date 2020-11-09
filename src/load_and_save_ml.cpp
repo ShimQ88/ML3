@@ -6,8 +6,8 @@ Count_Column_Numb(const string& filename){//only two case sample work need to de
     int numb_of_data_cols;
     ifstream myfile(filename);
     ofstream shuffled_file("data/shuffle_output.txt");
-    string line1[300];
-    string line2[300];
+    string line1[3000];
+    string line2[3000];
     string temp_line;
     int i=0;
     int j=0;
@@ -75,6 +75,7 @@ read_num_class_data( const string& filename, int var_count,
     const int M = 1024;
     char buf[M+2];
 
+    // Mat el_ptr(1, var_count, CV_32F);
     Mat el_ptr(1, var_count, CV_32F);
     int i;
     vector<int> responses;
@@ -98,15 +99,18 @@ read_num_class_data( const string& filename, int var_count,
         //char test;
         //test=buf[0]+65;
         //responses.push_back(test);
-        cout << "responses " << buf[0] << " " ;;//<<  endl;
+        cout << "responses " << buf[0] << " ";//<<  endl;
         ptr = buf+2;
-        for( i = 0; i < var_count; i++ )
+        for( i = 0; i < var_count; i++ )//in case of name is included
+            // for( i = 0; i < var_count; i++ )//in case of name is excluded
         {
             int n = 0;
             sscanf( ptr, "%f%n", &el_ptr.at<float>(i), &n );
             ptr += n + 1;
+            // cout<<"ptr: "<<ptr<<endl;
         }
         cout << el_ptr << endl;
+        // getchar();
         if( i < var_count )
             break;
         _data->push_back(el_ptr);
@@ -192,39 +196,76 @@ void Test(string input_file_name, string output_file_name){
         }
     }
 
-    
-    // string temp_read_line=read_line;
-    // delimiter = temp_read_line.find(',');
-    // temp_read_line = temp_read_line.substr(delimiter+1);//ignore the class number
-    
-    // delimiter = temp_read_line.find(',');
-    // string img_name_from_file=temp_read_line.substr(0,delimiter);
-    // cout<<"img_name_from_file: "<<img_name_from_file<<endl;
-    // char str[img_name_from_file.length()];
-
-    // cout << "The digit in the string are:" << endl;
-    // bool is_digit=true;
-    // for (int i=0; i<strlen(str); i++){
-    //     str[i]=img_name_from_file[i];
-    //     if (!isdigit(str[i])){
-    //         is_digit=false;
-    //         break;
-    //     }
-    // }
-    
-
-
-
-    // if (input_txt.is_open()){
-    //     while(getline(input_txt,line)){
-    //         cout << line << '\n';
-    //     }
-
-    //     myfile.close();
-    // }
     input_file.close();
     output_file.close();
 }
+
+void Test2(string input_file_name, string output_file_name){
+    ifstream input_file(input_file_name);
+    ofstream output_file(output_file_name);
+    string read_line;
+
+    int delimiter=0;
+    getline(input_file,read_line);
+    if((input_file.is_open())&&(output_file.is_open())){
+        while(getline(input_file, read_line)){
+            // strinh output_string;
+            int delimiter=0;
+            string temp_read_line=read_line;//copy string
+            int k=0;
+            while(delimiter!=-1){
+                delimiter = temp_read_line.find(',');
+                string splited_value=temp_read_line.substr(0,delimiter);
+                // cout<<"splited_value: "<<splited_value<<endl;
+                // cout<<"splited_value.length(): "<<splited_value.length()<<endl;
+                char str[splited_value.length()];
+                bool is_digit=true;
+                for (int i=0; i<splited_value.length(); i++){
+                    str[i]=splited_value[i];
+                    // cout<<"str[i]:"<<str[i]<<endl;
+                    // getchar();
+                    if((isdigit(str[i])==true)||(str[i]=='.')){
+                        
+                    }else{
+                        cout<<"this is not digit"<<endl;
+                        is_digit=false;
+                        break;
+                    }
+                }
+                // cout<<"k: "<<k<<endl;
+                // getchar();
+                if(is_digit==true){
+                    if(delimiter==-1){
+                        output_file<<splited_value;
+                    }else{
+                        if(k==0){
+                            output_file<<"1,";
+                            // cout<<"ha"<<endl;
+                            // getchar();
+                            // output_file<<',';    
+                        }else{
+                            output_file<<splited_value;
+                            output_file<<',';    
+                        }
+                        
+                    }
+                    
+                }else{
+                    output_file<<splited_value;
+                    output_file<<',';
+                    // doing nothing
+                }
+                k++;
+                temp_read_line = temp_read_line.substr(delimiter+1);//delete copied data
+            }
+            output_file<<"\n";
+        }
+    }
+
+    input_file.close();
+    output_file.close();
+}
+
 bool
 load_and_save_ml( const string& data_filename,
                       const string& filename_to_save,
@@ -235,26 +276,30 @@ load_and_save_ml( const string& data_filename,
     /*infomation 
        ml_technique= 1.neural_network 2.ada_boost 3.random_forest 
     */
-    Test("Final_dataset/contour.data","Final_dataset/contour_name_removed.data");
-    cout<<"hello work"<<endl;
-    getchar();
+    // string data_filename2="Final_dataset/contour_name_removed.data";
     Mat data;
     Mat responses;
     int numb_of_data_cols=Count_Column_Numb(data_filename);
     string name="data/shuffle_output.txt";
+    string name2="data/shuffle_output_name_removed.txt";
+    Test(name,name2);
     // cout<<"numb_of_data_cols: "<<numb_of_data_cols<<endl;
     // getchar();
 
-    bool ok = read_num_class_data( name, numb_of_data_cols, &data, &responses );//third parameter: FEATURES
+    bool ok = read_num_class_data( name2, numb_of_data_cols-1, &data, &responses );//third parameter: FEATURES
+    // bool ok = read_num_class_data( name, 10, &data, &responses );//third parameter: FEATURES
     // bool ok = read_num_class_data( data_filename, numb_of_data_cols, &data, &responses );//third parameter: FEATURES
     if( !ok ){
         cout<<"error from read file"<<endl;
         return ok;
     }
-
+    cout<<"responses: "<<responses<<endl;
+    cout<<"data: "<<data<<endl;
+    
     //preparing part
     int nsamples_all = data.rows;
-
+    cout<<"nsamples_all: "<<nsamples_all<<endl;
+    getchar();
     /*Division part*/
     int ntrain_samples = (int)round(nsamples_all*percent_of_division);//SPLIT
     int ntest_samples = (int)round(nsamples_all*(1-percent_of_division));//SPLIT
@@ -278,7 +323,66 @@ load_and_save_ml( const string& data_filename,
     Machine_Learning_Data_Preparation *prepared_data = new Machine_Learning_Data_Preparation(data, responses, ntrain_samples,ntest_samples, filename_to_save, filename_to_load);
     prepared_data->Main_Process(ml_technique);//data arrangement
     
-    Parent_ML *final_ml;  
+    ofstream acc;
+    acc.open("resource/rf/accuracy_collection.txt");
+    acc<<"i, MD, MSC, NT, MSE(index, setMaxDepth, setMinSampleCount, Number_of_Trees, Mean_Sqare_Error)\n";
+    
+    
+    // int min_samp_count=5;
+    // int i=0;
+    // while(1){
+    //     int max_dep=6;
+    //     while(1){
+    //         int TC=10000;
+    //         while(1){
+    //             Parent_ML *final_ml;
+    //             if(ml_technique==0){
+    //                 final_ml = Creat_ML_Class< Child_ML<ANN_MLP> >();  
+    //             }else if(ml_technique==1){
+    //                 final_ml = Creat_ML_Class< Child_ML<Boost> >();
+    //             }else if(ml_technique==2){
+    //                 final_ml = Creat_ML_Class< Child_ML<RTrees> >();
+    //             }else{
+    //                 cout<<"ml_technique code error"<<endl;
+    //                 return false;
+    //             }
+
+    //             final_ml->Main_Process(prepared_data,max_dep,min_samp_count,TC);//doing main process
+                
+    //             // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
+    //             string numb_ce=to_string(i);//check number of CEs
+                
+    //             Write_File file_write(numb_ce);//writing file class
+    //             // Write_File file_write(numb_ce);//writing file class
+    //             // cout<<"seg"<<endl;
+    //             // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
+    //             file_write.Main_Process(final_ml->mean, final_ml->variance, final_ml->sta_dev,prepared_data->k_fold_value,final_ml->confusion_matrix, final_ml->result_buffer);
+                                
+    //             acc<<to_string(i);
+    //             acc<<", ";
+    //             acc<<to_string(max_dep);
+    //             acc<<", ";
+    //             acc<<to_string(min_samp_count);
+    //             acc<<", ";
+    //             acc<<to_string(TC);
+    //             acc<<", ";
+    //             acc<<to_string(final_ml->mean);
+    //             acc<<"\n";
+    //             i++;
+    //             if(TC>=10000){break;}
+    //             TC=TC+1000;
+    //         }
+    //         max_dep=max_dep+1;
+    //         if(max_dep>6){break;}
+    //     }
+    //     min_samp_count=min_samp_count+1;
+    //     if(min_samp_count>=5){break;}
+    // }
+    // acc.close();
+    // cout<<"eh"<<endl;
+    // delete final_ml;
+    int i=0;
+    Parent_ML *final_ml;
     if(ml_technique==0){
         final_ml = Creat_ML_Class< Child_ML<ANN_MLP> >();  
     }else if(ml_technique==1){
@@ -290,12 +394,29 @@ load_and_save_ml( const string& data_filename,
         return false;
     }
 
-    final_ml->Main_Process(prepared_data);//doing main process
+    final_ml->Main_Process(prepared_data,0,0,0);//doing main process
     
-    string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
+    // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
+    // string numb_ce=to_string(i);//check number of CEs
     
-    Write_File file_write(numb_ce);//writing file class
+    Write_File file_write("0");//writing file class
+    // Write_File file_write(numb_ce);//writing file class
+    // cout<<"seg"<<endl;
+    // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
     file_write.Main_Process(final_ml->mean, final_ml->variance, final_ml->sta_dev,prepared_data->k_fold_value,final_ml->confusion_matrix, final_ml->result_buffer);
-    
+                    
+    // acc<<to_string(i);
+    // acc<<", ";
+    // acc<<to_string(max_dep);
+    // acc<<", ";
+    // acc<<to_string(min_samp_count);
+    // acc<<", ";
+    // acc<<to_string(TC);
+    // acc<<", ";
+    // acc<<to_string(final_ml->mean);
+    // acc<<"\n";
+    // i++;
+    // if(TC>=10000){break;}
+    // TC=TC+1000;
     return true;
 }
