@@ -21,12 +21,14 @@ Count_Column_Numb(const string& filename){//only two case sample work need to de
             }
             
             if(temp_line[0]=='0')
+                // if(temp_line[0]=='1')
             {
                 // cout<<"hahaha"<<endl;
                 line1[i]=temp_line;
                 i++;
             }
             else if(temp_line[0]=='1')
+                // else if(temp_line[0]=='9')
             {
                 line2[j]=temp_line;
                 j++;
@@ -99,7 +101,7 @@ read_num_class_data( const string& filename, int var_count,
         //char test;
         //test=buf[0]+65;
         //responses.push_back(test);
-        cout << "responses " << buf[0] << " ";//<<  endl;
+        cout << "responses " << buf[0] << " " <<endl;//<<  endl;
         ptr = buf+2;
         for( i = 0; i < var_count; i++ )//in case of name is included
             // for( i = 0; i < var_count; i++ )//in case of name is excluded
@@ -239,7 +241,7 @@ void Test2(string input_file_name, string output_file_name){
                         output_file<<splited_value;
                     }else{
                         if(k==0){
-                            output_file<<"1,";
+                            output_file<<"9,";
                             // cout<<"ha"<<endl;
                             // getchar();
                             // output_file<<',';    
@@ -283,6 +285,11 @@ load_and_save_ml( const string& data_filename,
     string name="data/shuffle_output.txt";
     string name2="data/shuffle_output_name_removed.txt";
     Test(name,name2);
+
+
+    // Test2("Final_dataset/temp/contour_bird.txt","Final_dataset/temp/contour_bird_final.txt");
+    // Test2("Final_dataset/temp/contour_rodent.txt","Final_dataset/temp/contour_rodent_final.txt");
+    // exit(1);
     // cout<<"numb_of_data_cols: "<<numb_of_data_cols<<endl;
     // getchar();
 
@@ -320,8 +327,6 @@ load_and_save_ml( const string& data_filename,
 
     
 
-    Machine_Learning_Data_Preparation *prepared_data = new Machine_Learning_Data_Preparation(data, responses, ntrain_samples,ntest_samples, filename_to_save, filename_to_load);
-    prepared_data->Main_Process(ml_technique);//data arrangement
     
     ofstream acc;
     acc.open("resource/rf/accuracy_collection.txt");
@@ -381,21 +386,43 @@ load_and_save_ml( const string& data_filename,
     // acc.close();
     // cout<<"eh"<<endl;
     // delete final_ml;
+    
     int i=0;
+    Machine_Learning_Data_Preparation *prepared_data = new Machine_Learning_Data_Preparation(data, responses, ntrain_samples,ntest_samples, filename_to_save, filename_to_load, 2);
+    prepared_data->Main_Process(ml_technique);//data arrangement
+    
+    //parameters in ANN
+    int max_iter=100;
+    float method_param=0.01;
+    //parameters in Boost
+    int boost_type=0;//Gentle 0.5 and true{DISCRETE, REAL, LOGIT, GENTLE}
+    int weak_count=100;
+    float weight_trim_rate=80.83;
+    int max_depth=12;
+    //parameters in Random Forest Trees
+    //int max_depth=10;
+    int min_sample_count=5;
+    float regression_accuracy=0.01f;
+    int max_categories=2;
+    int tc_value=10;
+
     Parent_ML *final_ml;
     if(ml_technique==0){
-        final_ml = Creat_ML_Class< Child_ML<ANN_MLP> >();  
+        final_ml = Creat_ML_Class< Child_ML <ANN_MLP> >(max_iter,0,method_param,0,0);//{max_iter,null,method_param,null,null}
     }else if(ml_technique==1){
-        final_ml = Creat_ML_Class< Child_ML<Boost> >();
+        final_ml = Creat_ML_Class< Child_ML <Boost> >(boost_type,weak_count,weight_trim_rate,max_depth,0);
     }else if(ml_technique==2){
-        final_ml = Creat_ML_Class< Child_ML<RTrees> >();
+        final_ml = Creat_ML_Class< Child_ML <RTrees> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
     }else{
         cout<<"ml_technique code error"<<endl;
         return false;
     }
 
-    final_ml->Main_Process(prepared_data,0,0,0);//doing main process
+    final_ml->Main_Process(prepared_data);//doing main process
+    cout<<"Head: "<<final_ml->Head_Parameter()<<endl;
     
+
+
     // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
     // string numb_ce=to_string(i);//check number of CEs
     
@@ -418,5 +445,7 @@ load_and_save_ml( const string& data_filename,
     // i++;
     // if(TC>=10000){break;}
     // TC=TC+1000;
+    delete prepared_data;
+
     return true;
 }

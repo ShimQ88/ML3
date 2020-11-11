@@ -1,1 +1,0 @@
-i, MD, MSC, NT, MSE(index, setMaxDepth, setMinSampleCount, Number_of_Trees, Mean_Sqare_Error)
