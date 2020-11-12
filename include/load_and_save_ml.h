@@ -790,42 +790,67 @@ void Child_ML<RTrees>::Return_Parameter(int index){
 }
 
 string Child_ML<RTrees>::Head_Parameter(){
-    return "Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera";
+    return "Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy";
 }
 
 
 class Write_File{
 private:
+    Parent_ML *final_ml;
+    Machine_Learning_Data_Preparation *prepared_data;
+    float mean;
+    float variance; 
+    float sta_dev; 
+    int k_fold_value; 
+    Mat *con_mat;
+    char **buffer_file;
     string file_full_path;
     string file_the_best_full_path;
+    string file_collection_full_path;
     ofstream file;
     ofstream file_the_best;
+    ofstream file_collection;
 public:
-    Write_File(string i_number_of_CE);
+    Write_File();
+    Write_File(Parent_ML *i_final_ml, Machine_Learning_Data_Preparation *i_prepared_data,string i_number_of_CE);
     ~Write_File();
-    void Main_Process(float mean, float variance,float sta_dev,int k_fold_value, Mat con_mat[],char **buffer_file);
+    // void Main_Process(float mean, float variance,float sta_dev,int k_fold_value, Mat con_mat[],char **buffer_file);
+    void Main_Process();
     string Create_file_path(string file_path, string file_name, string number_of_CE);
-    bool The_file_Process(ofstream &file,int k_fold_value,char **&buffer_file);
-    bool The_Best_Process(ofstream &file_the_best, float mean, float variance,float sta_dev,int k_fold_value, Mat con_mat[]);
+    bool The_File_Process();
+    bool The_File_Collection_Process();
+    bool The_Best_Process();
 };
 
-Write_File::Write_File(string i_number_of_CE){
+Write_File::Write_File(Parent_ML *i_final_ml, Machine_Learning_Data_Preparation *i_prepared_data,string i_number_of_CE){
+    final_ml=i_final_ml;
+    prepared_data=i_prepared_data;
+    mean=final_ml->mean;
+    variance=final_ml->variance; 
+    sta_dev=final_ml->sta_dev;
+    k_fold_value=prepared_data->k_fold_value;
+    con_mat=final_ml->confusion_matrix;
+    buffer_file=final_ml->result_buffer;
+
     string file_path="resource/rf/";
     file_full_path=Create_file_path(file_path,"accuracy_",i_number_of_CE);
     file_the_best_full_path=Create_file_path(file_path,"Calculate_standard_deviation_",i_number_of_CE);
-            
-    file.open(file_full_path);
-    file_the_best.open(file_the_best_full_path);
+    file_collection_full_path=Create_file_path(file_path,"accuracy_collection",i_number_of_CE);
 
+    file.open(file_full_path, std::ios_base::app);
+    file_collection.open(file_collection_full_path, std::ios_base::app);
+    file_the_best.open(file_the_best_full_path, std::ios_base::app);
 }
 Write_File::~Write_File(){
     file.close();
     file_the_best.close();
+    file_collection.close();
 }
-void Write_File::Main_Process(float mean, float variance,float sta_dev,int k_fold_value, Mat con_mat[],char **buffer_file){
-    The_Best_Process(file_the_best, mean, variance, sta_dev, k_fold_value, con_mat);
-    The_file_Process(file,k_fold_value,buffer_file);
-    
+// void Write_File::Main_Process(float mean, float variance,float sta_dev,int k_fold_value, Mat con_mat[],char **buffer_file){
+void Write_File::Main_Process(){
+    The_Best_Process();
+    The_File_Collection_Process();
+    The_File_Process();
 }
 
 string Write_File::Create_file_path(string file_path, string file_name, string number_of_CE){
@@ -834,20 +859,46 @@ string Write_File::Create_file_path(string file_path, string file_name, string n
     string temp_file_full_path=file_path+full_file_name;
     return temp_file_full_path;
 }
-bool Write_File::The_file_Process(ofstream &file,int k_fold_value,char **&buffer_file){
+
+bool Write_File::The_File_Process(){
+
+    file<<final_ml->Head_Parameter();
+    file<<endl;
     for(int i=0;i<k_fold_value;i++){
         file<<buffer_file[i];
     }
     return true;        
 }
-bool Write_File::The_Best_Process(ofstream &file_the_best, float mean, float variance,float sta_dev,int k_fold_value, Mat con_mat[]){
+
+bool Write_File::The_File_Collection_Process(){
+    char mse_buffer[70];
+    sprintf(mse_buffer, "%1.f ± %1.f%% \n", mean*100,sta_dev*100);
+    file_collection<<"Mean, Variance, Sta_dev, Mean Square Error";
+    file_collection<<endl;
+    file_collection<<to_string(mean);
+    file_collection<<", ";
+    file_collection<<to_string(variance);
+    file_collection<<", ";
+    file_collection<<to_string(sta_dev);
+    file_collection<<", ";
+    file_collection<<mse_buffer;
+    file_collection<<endl;
+    return true;        
+}
+
+bool Write_File::The_Best_Process(){
     char mean_buffer[20],variance_buffer[40],sta_dev_buffer[40],mse_buffer[70];
     sprintf(mean_buffer, "#mean: %f \n", mean);
     sprintf(variance_buffer, "#variance: %f \n", variance);
     sprintf(sta_dev_buffer, "#sta_dev: %f \n", sta_dev);  //header
     sprintf(mse_buffer, "#Mean Square Error: %1.f ± %1.f%% \n", mean*100,sta_dev*100);
-
-    
+    // cout<<"start Best"<<endl;
+    // cout<<"mean:"<<mean_buffer<<endl;
+    // cout<<"variance_buffer:"<<variance_buffer<<endl;
+    // cout<<"sta_dev_buffer:"<<sta_dev_buffer<<endl;
+    // cout<<"mse_buffer:"<<mse_buffer<<endl;
+    // cout<<"end Best"<<endl;
+    file_the_best << "-----------------------\n";
     if (file_the_best){
         // file_the_best<<"\n\n";    
         file_the_best<<mean_buffer;

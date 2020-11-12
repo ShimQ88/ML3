@@ -328,9 +328,9 @@ load_and_save_ml( const string& data_filename,
     
 
     
-    ofstream acc;
-    acc.open("resource/rf/accuracy_collection.txt");
-    acc<<"i, MD, MSC, NT, MSE(index, setMaxDepth, setMinSampleCount, Number_of_Trees, Mean_Sqare_Error)\n";
+    // ofstream acc;
+    // acc.open("resource/rf/accuracy_collection.txt");
+    // acc<<"i, MD, MSC, NT, MSE(index, setMaxDepth, setMinSampleCount, Number_of_Trees, Mean_Sqare_Error)\n";
     
     
     // int min_samp_count=5;
@@ -419,18 +419,16 @@ load_and_save_ml( const string& data_filename,
     }
 
     final_ml->Main_Process(prepared_data);//doing main process
-    cout<<"Head: "<<final_ml->Head_Parameter()<<endl;
     
-
 
     // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
     // string numb_ce=to_string(i);//check number of CEs
     
-    Write_File file_write("0");//writing file class
+    Write_File file_write(final_ml,prepared_data,"0");//writing file class
     // Write_File file_write(numb_ce);//writing file class
     // cout<<"seg"<<endl;
     // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
-    file_write.Main_Process(final_ml->mean, final_ml->variance, final_ml->sta_dev,prepared_data->k_fold_value,final_ml->confusion_matrix, final_ml->result_buffer);
+    file_write.Main_Process();
                     
     // acc<<to_string(i);
     // acc<<", ";
@@ -445,7 +443,7 @@ load_and_save_ml( const string& data_filename,
     // i++;
     // if(TC>=10000){break;}
     // TC=TC+1000;
-    delete prepared_data;
+    // delete prepared_data;
 
     return true;
 }
