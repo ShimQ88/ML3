@@ -155,6 +155,9 @@ int main(int argc, char *argv[]){
             
             exit(10);
             // return 0;
+        }else if(strcmp(argv[i],"-test") == 0){
+            
+        
         }else if(strcmp(argv[i],"-filtering_v2") == 0){
             ROI_SUCCESS test;
             test.Main_Process();

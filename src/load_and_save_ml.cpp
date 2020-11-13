@@ -387,7 +387,7 @@ load_and_save_ml( const string& data_filename,
     // cout<<"eh"<<endl;
     // delete final_ml;
     
-    int i=0;
+    // int i=0;
     Machine_Learning_Data_Preparation *prepared_data = new Machine_Learning_Data_Preparation(data, responses, ntrain_samples,ntest_samples, filename_to_save, filename_to_load, 2);
     prepared_data->Main_Process(ml_technique);//data arrangement
     
@@ -404,31 +404,44 @@ load_and_save_ml( const string& data_filename,
     int min_sample_count=5;
     float regression_accuracy=0.01f;
     int max_categories=2;
-    int tc_value=10;
-
-    Parent_ML *final_ml;
-    if(ml_technique==0){
-        final_ml = Creat_ML_Class< Child_ML <ANN_MLP> >(max_iter,0,method_param,0,0);//{max_iter,null,method_param,null,null}
-    }else if(ml_technique==1){
-        final_ml = Creat_ML_Class< Child_ML <Boost> >(boost_type,weak_count,weight_trim_rate,max_depth,0);
-    }else if(ml_technique==2){
-        final_ml = Creat_ML_Class< Child_ML <RTrees> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
-    }else{
-        cout<<"ml_technique code error"<<endl;
-        return false;
-    }
-
-    final_ml->Main_Process(prepared_data);//doing main process
     
 
-    // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
-    // string numb_ce=to_string(i);//check number of CEs
+    // while(1){
+        int tc_value=50;
+        for(int i=0;i<4;i++){
+            Parent_ML *final_ml;
+            if(ml_technique==0){
+                final_ml = Creat_ML_Class< Child_ML <ANN_MLP> >(max_iter,0,method_param,0,0);//{max_iter,null,method_param,null,null}
+            }else if(ml_technique==1){
+                final_ml = Creat_ML_Class< Child_ML <Boost> >(boost_type,weak_count,weight_trim_rate,max_depth,0);
+            }else if(ml_technique==2){
+                // final_ml = Creat_ML_Class< Child_ML <RTrees> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
+                final_ml = Creat_ML_Class< Child_ML <SVM> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
+            }else{
+                cout<<"ml_technique code error"<<endl;
+                return false;
+            }
+
+            final_ml->Main_Process(prepared_data);//doing main process
+            
+
+            // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
+            // string numb_ce=to_string(i);//check number of CEs
+            
+            Write_File file_write(final_ml,prepared_data,"0");//writing file class
+            // Write_File file_write(numb_ce);//writing file class
+            // cout<<"seg"<<endl;
+            // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
+            file_write.Main_Process();
+            tc_value=tc_value*2;
+        }
+    //     min_sample_count=min_sample_count+1;
+    //     if(min_sample_count==8){break;}
+
+    // }
     
-    Write_File file_write(final_ml,prepared_data,"0");//writing file class
-    // Write_File file_write(numb_ce);//writing file class
-    // cout<<"seg"<<endl;
-    // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
-    file_write.Main_Process();
+
+   
                     
     // acc<<to_string(i);
     // acc<<", ";

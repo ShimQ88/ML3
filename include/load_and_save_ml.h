@@ -157,6 +157,12 @@ void Machine_Learning_Data_Preparation::Main_Process(int technique){
             test_responses[value] = Mat::zeros( ntest_samples, class_count, CV_32F );
             train_responses_int[value] = Mat::zeros( ntrain_samples, 1, CV_32F );
             test_responses_int[value] = Mat::zeros( ntest_samples, 1, CV_32F );
+
+            // train_responses[value] = Mat::zeros( ntrain_samples, class_count, CV_32FC1 );
+            // test_responses[value] = Mat::zeros( ntest_samples, class_count, CV_32FC1 );
+            // train_responses_int[value] = Mat::zeros( ntrain_samples, 1, CV_32FC1 );
+            // test_responses_int[value] = Mat::zeros( ntest_samples, 1, CV_32FC1 );
+            
         }else{
             
         }
@@ -304,6 +310,7 @@ public:
     float variance=0;
     float sta_dev;
     char **result_buffer;
+    char *final_result_buffer;
     Machine_Learning_Data_Preparation *ml;
     Parent_ML(){}
     ~Parent_ML();
@@ -323,6 +330,7 @@ void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data){
     confusion_matrix=new Mat[ml->k_fold_value];
     accuracy=new float[ml->k_fold_value];
     result_buffer=new char*[ml->k_fold_value];
+    final_result_buffer=new char[50];
     for(int i=0;i<ml->k_fold_value;i++){
         result_buffer[i]=new char[50];
     }   
@@ -484,7 +492,7 @@ Mat Parent_ML::test_and_save_classifier(const Ptr<StatModel>& model,
 //     r = model->predict( sample1 );
 //     cout << "Prediction: " << r << endl;
     cout<<"problem_val: "<<problem_val<<endl;
-    getchar();
+    // getchar();
     return confusion_Matrix;
     
 /**********************************************************************/
@@ -755,6 +763,7 @@ public:
     string Head_Parameter();
 };
 void Child_ML<RTrees>::Intialize(){
+    sprintf(final_result_buffer, "%d, %d, %f, %d, %d", max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count);  //header
     // cout<<"THis is RF"<<endl;
     // getchar();
     
@@ -787,9 +796,82 @@ void Child_ML<RTrees>::Calculate_Result(){
 }
 void Child_ML<RTrees>::Return_Parameter(int index){
     sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count, accuracy[index]);  //header
+    
 }
 
 string Child_ML<RTrees>::Head_Parameter(){
+    return "Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy";
+}
+
+template<>
+class Child_ML<SVM> : public Parent_ML{
+
+private:
+    // int max_depth=12;
+    // int min_sample_count=5;
+    // float regression_accuracy=0.01f;
+    // int max_categories=2;
+    // int tc_value=100;
+
+public:
+    Ptr<SVM> *model;
+    Child_ML(){}
+    Child_ML(int p1, int p2, float p3, int p4, int p5){
+        // max_depth=p1;
+        // min_sample_count=p2;
+        // regression_accuracy=p3;
+        // max_categories=p4;
+        // tc_value=p5;
+    }
+    ~Child_ML(){delete model;}
+    void Intialize();
+    void Calculate_Result();
+    void Return_Parameter(int index);
+    string Head_Parameter();
+};
+void Child_ML<SVM>::Intialize(){
+    // sprintf(final_result_buffer, "%d, %d, %f, %d, %d", max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count);  //header
+    // cout<<"THis is RF"<<endl;
+    // getchar();
+    
+    model=new Ptr<SVM>[ml->k_fold_value];
+    
+    for(int i=0;i<ml->k_fold_value;i++){
+        model[i] = SVM::create();
+        model[i]->setType(SVM::EPS_SVR);//C_SVC, NU_SVC, ONE_CLASS, EPS_SVR, NU_SVR
+        model[i]->setKernel(SVM::RBF);//CUSTOM, LINEAR, POLY, RBF, SIGMOID, CHI2, INTER
+        model[i]->setDegree(0);
+        model[i]->setGamma(10);
+        model[i]->setCoef0(0.0);
+        model[i]->setC(5);
+        model[i]->setNu(0);
+        model[i]->setP(10);
+        model[i]->setClassWeights(Mat());
+        model[i]->setTermCriteria(ml->TC(100,0));
+        // model[i]->setTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 1000, 0.000001);
+        cout << "Training the classifier (may take a few minutes)...\n";
+        // model[i]->setTermCriteria(TermCriteria(TermCriteria::COUNT, 50, 0));
+        model[i]->train(ml->tdata[i]);
+    }
+    // cout<<"tc_value: "<<tc_value<<endl;
+    // getchar();
+    cout << endl;
+}
+void Child_ML<SVM>::Calculate_Result(){
+    for(int i=0;i<ml->k_fold_value;i++){
+        confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
+        // confusion_matrix[i]=test_and_save_classifier(model[i], ml->train_data[i], ml->train_responses_int[i], ml->ntrain_samples, 0, ml->filename_to_save,ml->ml_technique);
+        accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
+        sum_accuracy=sum_accuracy+accuracy[i];
+        Return_Parameter(i);
+    }
+}
+void Child_ML<SVM>::Return_Parameter(int index){
+    // sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count, accuracy[index]);  //header
+    
+}
+
+string Child_ML<SVM>::Head_Parameter(){
     return "Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy";
 }
 
@@ -871,19 +953,26 @@ bool Write_File::The_File_Process(){
 }
 
 bool Write_File::The_File_Collection_Process(){
-    char mse_buffer[70];
-    sprintf(mse_buffer, "%1.f ± %1.f%% \n", mean*100,sta_dev*100);
-    file_collection<<"Mean, Variance, Sta_dev, Mean Square Error";
+    // char mse_buffer[70];
+    // sprintf(mse_buffer, "%1.f ± %1.f%% \n", mean*100,sta_dev*100);
+    // file_collection<<"#Mean, Variance, Sta_dev, Mean Square Error";
+    // file_collection<<endl;
+    // file_collection<<to_string(mean);
+    // file_collection<<", ";
+    // file_collection<<to_string(variance);
+    // file_collection<<", ";
+    // file_collection<<to_string(sta_dev);
+    // file_collection<<", ";
+    // file_collection<<mse_buffer;
+    // file_collection<<endl;
+    file_collection<<"#MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy";
     file_collection<<endl;
+    file_collection<<final_ml->final_result_buffer;
+    file_collection<<", ";
     file_collection<<to_string(mean);
-    file_collection<<", ";
-    file_collection<<to_string(variance);
-    file_collection<<", ";
-    file_collection<<to_string(sta_dev);
-    file_collection<<", ";
-    file_collection<<mse_buffer;
-    file_collection<<endl;
-    return true;        
+    file_collection<<endl; 
+    
+    return true;
 }
 
 bool Write_File::The_Best_Process(){
