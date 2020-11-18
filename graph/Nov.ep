@@ -11,7 +11,7 @@
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
 # set terminal qt 0 font "Sans,9"
-# set output
+# set output 'graph/Nov.out'
 unset clip points
 set clip one
 unset clip two
@@ -164,11 +164,11 @@ set loadpath
 set fontpath 
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
-file(i) = sprintf("resource/rf/accuracy_collection0.txt",i)
+check_valid_column(c) = valid(c) ? check_valid_column(c + 1) : c - 1
 GNUTERM = "qt"
 CE10 = 10
 CE15 = 15
 CE20 = 20
 ## Last datafile plotted: "<(sed -n '2,6p' resource/rf/accuracy_collection0.txt )"
-plot "<(sed -n '2,6p' resource/rf/accuracy_collection0.txt )" using 4:6 smooth unique with lp title 'CE10' linestyle 15
+
 #    EOF

@@ -1,6 +1,6 @@
 // Project Headers
 #include "load_and_save_ml.h"
-
+#define GET_VARIABLE_NAME(Variable) (#Variable)
 int
 Count_Column_Numb(const string& filename){//only two case sample work need to develop more
     int numb_of_data_cols;
@@ -404,23 +404,23 @@ load_and_save_ml( const string& data_filename,
     int min_sample_count=5;
     float regression_accuracy=0.01f;
     int max_categories=2;
-    
 
-    // while(1){
+    while(1){
         int tc_value=50;
-        for(int i=0;i<4;i++){
+        for(int i=0;i<10;i++){
             Parent_ML *final_ml;
             if(ml_technique==0){
                 final_ml = Creat_ML_Class< Child_ML <ANN_MLP> >(max_iter,0,method_param,0,0);//{max_iter,null,method_param,null,null}
             }else if(ml_technique==1){
                 final_ml = Creat_ML_Class< Child_ML <Boost> >(boost_type,weak_count,weight_trim_rate,max_depth,0);
             }else if(ml_technique==2){
-                // final_ml = Creat_ML_Class< Child_ML <RTrees> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
-                final_ml = Creat_ML_Class< Child_ML <SVM> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
+                final_ml = Creat_ML_Class< Child_ML <RTrees> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
+                // final_ml = Creat_ML_Class< Child_ML <SVM> >(max_depth,min_sample_count,regression_accuracy,max_categories,tc_value);
             }else{
                 cout<<"ml_technique code error"<<endl;
                 return false;
             }
+
 
             final_ml->Main_Process(prepared_data);//doing main process
             
@@ -428,17 +428,20 @@ load_and_save_ml( const string& data_filename,
             // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
             // string numb_ce=to_string(i);//check number of CEs
             
-            Write_File file_write(final_ml,prepared_data,"0");//writing file class
+            Write_File file_write(final_ml,prepared_data,to_string(min_sample_count));//writing file class
             // Write_File file_write(numb_ce);//writing file class
             // cout<<"seg"<<endl;
             // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
+            if(i==0){
+                file_write.Write_Header();
+            }
             file_write.Main_Process();
-            tc_value=tc_value*2;
+            tc_value=tc_value+5;
         }
-    //     min_sample_count=min_sample_count+1;
-    //     if(min_sample_count==8){break;}
+        min_sample_count=min_sample_count+1;
+        if(min_sample_count==20){break;}
 
-    // }
+    }
     
 
    
