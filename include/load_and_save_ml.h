@@ -347,7 +347,7 @@ public:
     
     Mat test_and_save_classifier(const Ptr<StatModel>& model,const Mat& data, const Mat& responses, int ntrain_samples, int rdelta, const string& filename_to_save, int ml_technique);
     virtual void Intialize()=0;
-    virtual Mat *Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml)=0;
+    virtual Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml)=0;
     virtual float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml)=0;
     virtual float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml)=0;
     virtual void Calculate_Result()=0;
@@ -395,22 +395,22 @@ void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data){
     // Calculate_standard_deviation();
 
     //virtual functions
-    confusion_matrix_test=Calculate_Confusion_Matrices(ml);
+    confusion_matrix_test=Calculate_Confusion_Matrices(0,ml);
     accuracy_test=Calculate_Accuracies(confusion_matrix_test, ml);
     sum_accuracy_test=Calculate_Sum_Accuracy(accuracy_test, ml);
 
-    confusion_matrix_train=Calculate_Confusion_Matrices(ml);
-    accuracy_train=Calculate_Accuracies(confusion_matrix_train, ml);
-    sum_accuracy_train=Calculate_Sum_Accuracy(accuracy_train, ml);
+    // confusion_matrix_train=Calculate_Confusion_Matrices(ml);
+    // accuracy_train=Calculate_Accuracies(confusion_matrix_train, ml);
+    // sum_accuracy_train=Calculate_Sum_Accuracy(accuracy_train, ml);
     
     //parent functions
     mean_test=Calculate_Mean(sum_accuracy_test, ml);
     variance_test=Calculate_Variance(accuracy_test, mean_test, ml);
     sta_dev_test=Calculate_Standard_Deviation(variance_test);
 
-    mean_train=Calculate_Mean(sum_accuracy_train, ml);
-    variance_train=Calculate_Variance(accuracy_train, mean_train, ml);
-    sta_dev_train=Calculate_Standard_Deviation(variance_train);
+    // mean_train=Calculate_Mean(sum_accuracy_train, ml);
+    // variance_train=Calculate_Variance(accuracy_train, mean_train, ml);
+    // sta_dev_train=Calculate_Standard_Deviation(variance_train);
 
 
 }
@@ -601,7 +601,7 @@ public:
     void Intialize(){cout<<"error choose different technique"<<endl;}
     void Return_Parameter(int index){cout<<"error"<<endl;}
     string Head_Parameter(){return "error This is default child";}
-    Mat *Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml){
+    Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml){
         Mat *out_mat;
         return out_mat;
     }
@@ -633,7 +633,7 @@ public:
     ~Child_ML(){delete model;}
     void Intialize();
     void Calculate_Result();
-    Mat *Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml);
+    Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml);
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
     void Return_Parameter(int index);
@@ -650,12 +650,17 @@ float *Child_ML<ANN_MLP>::Calculate_Accuracies(Mat *&i_confusion_matrix, Machine
     return out_accuracies;
 }
 
-Mat *Child_ML<ANN_MLP>::Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml){
+Mat *Child_ML<ANN_MLP>::Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml){
     Mat *out_confusion_matrix;
     out_confusion_matrix=new Mat[i_ml->k_fold_value];
 
     for(int i=0; i< i_ml->k_fold_value; i++){
-        out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        if(type==0){//test
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }else{//train
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->train_data[i], i_ml->train_responses_int[i], i_ml->ntrain_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }
+        
     }
     return out_confusion_matrix;
 }
@@ -733,7 +738,7 @@ public:
     ~Child_ML(){delete model;}
     void Intialize();
     void Calculate_Result();
-    Mat *Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml);
+    Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml);
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
     void Return_Parameter(int index);
@@ -757,12 +762,16 @@ void Child_ML<Boost> ::Intialize(){
 }
 
 
-Mat *Child_ML<Boost>::Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml){
+Mat *Child_ML<Boost>::Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml){
     Mat *out_confusion_matrix;
     out_confusion_matrix=new Mat[i_ml->k_fold_value];
 
     for(int i=0; i< i_ml->k_fold_value; i++){
-        out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        if(type==0){//test
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }else{//train
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->train_data[i], i_ml->train_responses_int[i], i_ml->ntrain_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }
     }
     return out_confusion_matrix;
 }
@@ -828,7 +837,7 @@ public:
     ~Child_ML(){delete model;}
     void Intialize();
     void Calculate_Result();
-    Mat *Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml);
+    Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml);
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
     void Return_Parameter(int index);
@@ -869,12 +878,16 @@ float *Child_ML<RTrees>::Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_
     return out_accuracies;
 }
 
-Mat *Child_ML<RTrees>::Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml){
+Mat *Child_ML<RTrees>::Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml){
     Mat *out_confusion_matrix;
     out_confusion_matrix=new Mat[i_ml->k_fold_value];
 
     for(int i=0; i< i_ml->k_fold_value; i++){
-        out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        if(type==0){//test
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }else{//train
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->train_data[i], i_ml->train_responses_int[i], i_ml->ntrain_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }
     }
     return out_confusion_matrix;
 }
@@ -928,7 +941,7 @@ public:
     }
     ~Child_ML(){delete model;}
     void Intialize();
-    Mat *Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml);
+    Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml);
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
     void Calculate_Result();
@@ -975,11 +988,15 @@ float *Child_ML<SVM>::Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Lea
     return out_accuracies;
 }
 
-Mat *Child_ML<SVM>::Calculate_Confusion_Matrices(Machine_Learning_Data_Preparation *&i_ml){
+Mat *Child_ML<SVM>::Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml){
     Mat *out_confusion_matrix;
     out_confusion_matrix=new Mat[i_ml->k_fold_value];
     for(int i=0; i< i_ml->k_fold_value; i++){
-        out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        if(type==0){//test
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->test_data[i], i_ml->test_responses_int[i], i_ml->ntest_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }else{//train
+            out_confusion_matrix[i]=test_and_save_classifier(model[i], i_ml->train_data[i], i_ml->train_responses_int[i], i_ml->ntrain_samples, 0, i_ml->filename_to_save, i_ml->ml_technique);
+        }
     }
     return out_confusion_matrix;
 }
@@ -1075,7 +1092,7 @@ void Write_File::Write_Header(){
 void Write_File::Main_Process(){
     // The_Best_Process();
     // The_File_Collection_Process(final_ml->mean_test);
-    The_File_Process();
+    // The_File_Process();
 
 
     The_Best_Process(final_ml->mean_test, final_ml->variance_test, final_ml->sta_dev_test, 
@@ -1120,7 +1137,7 @@ bool Write_File::The_File_Collection_Process(float i_mean){
     return true;
 }
 
-bool Write_File::The_Best_Process(float i_mean, float i_variance, float i_sta_dev, int i_k_fold_value,Mat *&i_con_mat, string type){
+bool Write_File::The_Best_Process(float i_mean, float i_variance, float i_sta_dev, int i_k_fold_value, Mat *&i_con_mat, string type){
     char mean_buffer[20],variance_buffer[40],sta_dev_buffer[40],mse_buffer[70];
     sprintf(mean_buffer, "#mean: %f \n", i_mean);
     sprintf(variance_buffer, "#variance: %f \n", i_variance);
