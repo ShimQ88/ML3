@@ -399,6 +399,8 @@ void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data){
     accuracy_test=Calculate_Accuracies(confusion_matrix_test, ml);
     sum_accuracy_test=Calculate_Sum_Accuracy(accuracy_test, ml);
 
+    // cout<<"confusion_matrix_test: "<<confusion_matrix_test[0]<<endl;
+    // getchar();
     // confusion_matrix_train=Calculate_Confusion_Matrices(ml);
     // accuracy_train=Calculate_Accuracies(confusion_matrix_train, ml);
     // sum_accuracy_train=Calculate_Sum_Accuracy(accuracy_train, ml);
