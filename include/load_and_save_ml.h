@@ -302,36 +302,36 @@ T *Creat_ML_Class(int p1, int p2, float p3, int p4, int p5){
 class Parent_ML{
 public:
     
-    Mat *confusion_matrix;
+    // Mat *confusion_matrix;
     Mat *confusion_matrix_test;
     Mat *confusion_matrix_train;
 
-    float *accuracy;
+    // float *accuracy;
     float *accuracy_test;
     float *accuracy_train;
     // char **result_buffer;
-    float sum_accuracy=0;
+    // float sum_accuracy=0;
     float sum_accuracy_test=0;
     float sum_accuracy_train=0;
 
     int ml_technique;
-    float mean;
+    // float mean;
     float mean_test;
     float mean_train;
     
-    float variance=0;
+    // float variance=0;
     float variance_test=0;
     float variance_train=0;
     
-    float sta_dev;
+    // float sta_dev;
     float sta_dev_test;
     float sta_dev_train;
 
-    char **result_buffer;
+    char *result_buffer;
     char **result_buffer_test;
     char **result_buffer_train;
 
-    char *final_result_buffer;
+    // char *final_result_buffer;
     char *final_result_buffer_test;
     char *final_result_buffer_train;
 
@@ -351,7 +351,7 @@ public:
     virtual float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml)=0;
     virtual float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml)=0;
     virtual void Calculate_Result()=0;
-    virtual void Return_Parameter(int index)=0;
+    virtual void Return_Parameter()=0;
     virtual string Head_Parameter()=0;
 };
 
@@ -361,26 +361,26 @@ Parent_ML::Parent_ML(){
 void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data){
     ml=prepared_data;
 
-    confusion_matrix=new Mat[ml->k_fold_value];
+    // confusion_matrix=new Mat[ml->k_fold_value];
     confusion_matrix_test=new Mat[ml->k_fold_value];
     confusion_matrix_train=new Mat[ml->k_fold_value];
 
-    accuracy=new float[ml->k_fold_value];
+    // accuracy=new float[ml->k_fold_value];
     accuracy_test=new float[ml->k_fold_value];
     accuracy_train=new float[ml->k_fold_value];
 
-    result_buffer=new char*[ml->k_fold_value];
+    result_buffer=new char[50];
     result_buffer_test=new char*[ml->k_fold_value];
     result_buffer_train=new char*[ml->k_fold_value];
 
-    final_result_buffer=new char[50];
+    // final_result_buffer=new char[50];
     final_result_buffer_test=new char[50];
     final_result_buffer_train=new char[50];
     
 
-    for(int i=0;i<ml->k_fold_value;i++){
-        result_buffer[i]=new char[50];
-    }
+    // for(int i=0;i<ml->k_fold_value;i++){
+    //     result_buffer[i]=new char[50];
+    // }
     for(int i=0;i<ml->k_fold_value;i++){
         result_buffer_test[i]=new char[50];
     }
@@ -401,38 +401,46 @@ void Parent_ML::Main_Process(Machine_Learning_Data_Preparation *&prepared_data){
 
     // cout<<"confusion_matrix_test: "<<confusion_matrix_test[0]<<endl;
     // getchar();
-    // confusion_matrix_train=Calculate_Confusion_Matrices(ml);
-    // accuracy_train=Calculate_Accuracies(confusion_matrix_train, ml);
-    // sum_accuracy_train=Calculate_Sum_Accuracy(accuracy_train, ml);
+    confusion_matrix_train=Calculate_Confusion_Matrices(1,ml);
+    accuracy_train=Calculate_Accuracies(confusion_matrix_train, ml);
+    sum_accuracy_train=Calculate_Sum_Accuracy(accuracy_train, ml);
     
     //parent functions
     mean_test=Calculate_Mean(sum_accuracy_test, ml);
     variance_test=Calculate_Variance(accuracy_test, mean_test, ml);
     sta_dev_test=Calculate_Standard_Deviation(variance_test);
 
-    // mean_train=Calculate_Mean(sum_accuracy_train, ml);
-    // variance_train=Calculate_Variance(accuracy_train, mean_train, ml);
-    // sta_dev_train=Calculate_Standard_Deviation(variance_train);
+    mean_train=Calculate_Mean(sum_accuracy_train, ml);
+    variance_train=Calculate_Variance(accuracy_train, mean_train, ml);
+    sta_dev_train=Calculate_Standard_Deviation(variance_train);
+
+    Return_Parameter();
+    
+    // getchar();
 
 
 }
 
 Parent_ML::~Parent_ML(){
-    for(int i=0;i<ml->k_fold_value;i++){
-        delete result_buffer[i];
-    }
+    
+    // for(int i=0;i<ml->k_fold_value;i++){
+    //     delete result_buffer[i];
+    // }
+
     for(int i=0;i<ml->k_fold_value;i++){
         delete result_buffer_test[i];
     }
+
     for(int i=0;i<ml->k_fold_value;i++){
         delete result_buffer_train[i];
     }
 
-    delete accuracy;
+    delete result_buffer;
+    // delete accuracy;
     delete accuracy_test;
     delete accuracy_train;
 
-    delete confusion_matrix;
+    // delete confusion_matrix;
     delete confusion_matrix_test;
     delete confusion_matrix_train;
 }
@@ -601,7 +609,7 @@ class Child_ML : public Parent_ML{
 public:
     // Machine_Learning *ml;
     void Intialize(){cout<<"error choose different technique"<<endl;}
-    void Return_Parameter(int index){cout<<"error"<<endl;}
+    void Return_Parameter(){cout<<"error"<<endl;}
     string Head_Parameter(){return "error This is default child";}
     Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml){
         Mat *out_mat;
@@ -638,7 +646,7 @@ public:
     Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml);
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
-    void Return_Parameter(int index);
+    void Return_Parameter();
     string Head_Parameter();
 };
 
@@ -671,7 +679,7 @@ float Child_ML<ANN_MLP>::Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Lear
     float out_sum_accuracy=0;
     for(int i=0; i< i_ml->k_fold_value; i++){
         out_sum_accuracy=out_sum_accuracy+i_accuracy[i];
-        Return_Parameter(i);
+        // Return_Parameter(i);
     }
     return out_sum_accuracy;
 }
@@ -702,16 +710,16 @@ void Child_ML<ANN_MLP>::Intialize(){
 }
 
 void Child_ML<ANN_MLP>::Calculate_Result(){
-    for(int i=0;i<ml->k_fold_value;i++){
-        confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
-        accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
-        sum_accuracy=sum_accuracy+accuracy[i];
-        Return_Parameter(i);
-    }
+    // for(int i=0;i<ml->k_fold_value;i++){
+    //     confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
+    //     accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
+    //     sum_accuracy=sum_accuracy+accuracy[i];
+    //     Return_Parameter(i);
+    // }
 }
 
-void Child_ML<ANN_MLP>::Return_Parameter(int index ){
-    sprintf(result_buffer[index], "%d, %d, %d, %lf, %d, %d, %f \n", index, t_method, a_function, method_param, max_iter, ml->class_count, accuracy[index]);  //header
+void Child_ML<ANN_MLP>::Return_Parameter(){
+    // sprintf(result_buffer[index], "%d, %d, %d, %lf, %d, %d, %f \n", index, t_method, a_function, method_param, max_iter, ml->class_count, accuracy[index]);  //header
 }
 
 string Child_ML<ANN_MLP>::Head_Parameter(){
@@ -743,7 +751,7 @@ public:
     Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml);
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
-    void Return_Parameter(int index);
+    void Return_Parameter();
     string Head_Parameter();
 };
 void Child_ML<Boost> ::Intialize(){
@@ -792,23 +800,23 @@ float Child_ML<Boost>::Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learni
     float out_sum_accuracy=0;
     for(int i=0; i< i_ml->k_fold_value; i++){
         out_sum_accuracy=out_sum_accuracy+i_accuracy[i];
-        Return_Parameter(i);
+        // Return_Parameter();
     }
     return out_sum_accuracy;
 }
 
 void Child_ML<Boost> ::Calculate_Result(){
-    for(int i=0;i<ml->k_fold_value;i++){
-        confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
-        accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
-        sum_accuracy=sum_accuracy+accuracy[i];
-        Return_Parameter(i);
-    }
+    // for(int i=0;i<ml->k_fold_value;i++){
+    //     confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
+    //     accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
+    //     sum_accuracy=sum_accuracy+accuracy[i];
+    //     Return_Parameter(i);
+    // }
 }
 
 
-void Child_ML<Boost>::Return_Parameter(int index){
-    sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, boost_type, weak_count, weight_trim_rate, max_depth, ml->class_count, accuracy[index]);  //header
+void Child_ML<Boost>::Return_Parameter(){
+    // sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, boost_type, weak_count, weight_trim_rate, max_depth, ml->class_count, accuracy[index]);  //header
 }
 
 string Child_ML<Boost>::Head_Parameter(){
@@ -842,12 +850,12 @@ public:
     Mat *Calculate_Confusion_Matrices(int type, Machine_Learning_Data_Preparation *&i_ml);
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
-    void Return_Parameter(int index);
+    void Return_Parameter();
     string Head_Parameter();
 };
 
 void Child_ML<RTrees>::Intialize(){
-    sprintf(final_result_buffer, "%d, %d, %f, %d, %d", max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count);  //header
+    // sprintf(final_result_buffer, "%d, %d, %f, %d, %d", max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count);  //header
     // cout<<"THis is RF"<<endl;
     // getchar();
     
@@ -898,27 +906,28 @@ float Child_ML<RTrees>::Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learn
     float out_sum_accuracy=0;
     for(int i=0; i< i_ml->k_fold_value; i++){
         out_sum_accuracy=out_sum_accuracy+i_accuracy[i];
-        Return_Parameter(i);
+        // Return_Parameter(i);
     }
     return out_sum_accuracy;
 }
 
 void Child_ML<RTrees>::Calculate_Result(){
-    for(int i=0;i<ml->k_fold_value;i++){
-        confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
-        // confusion_matrix[i]=test_and_save_classifier(model[i], ml->train_data[i], ml->train_responses_int[i], ml->ntrain_samples, 0, ml->filename_to_save,ml->ml_technique);
-        accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
-        sum_accuracy=sum_accuracy+accuracy[i];
-        Return_Parameter(i);
-    }
+    // for(int i=0;i<ml->k_fold_value;i++){
+    //     confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
+    //     // confusion_matrix[i]=test_and_save_classifier(model[i], ml->train_data[i], ml->train_responses_int[i], ml->ntrain_samples, 0, ml->filename_to_save,ml->ml_technique);
+    //     accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
+    //     sum_accuracy=sum_accuracy+accuracy[i];
+    //     Return_Parameter(i);
+    // }
 }
-void Child_ML<RTrees>::Return_Parameter(int index){
-    sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count, accuracy[index]);  //header
-    
+void Child_ML<RTrees>::Return_Parameter(){
+    // cout<<"h"<<endl;
+    sprintf(result_buffer, "%d, %d, %f, %d, %d, %f, %f\n", max_depth, min_sample_count, regression_accuracy, tc_value, ml->class_count, mean_test*100, mean_train*100);  //header
+    // sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count);  //header
 }
 
 string Child_ML<RTrees>::Head_Parameter(){
-    return "Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy";
+    return "MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy, Test_Accuracy, Train_Accuracy";
 }
 
 template<>
@@ -947,7 +956,7 @@ public:
     float *Calculate_Accuracies(Mat *&i_confusion_matrix, Machine_Learning_Data_Preparation *&i_ml);
     float Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning_Data_Preparation *&i_ml);
     void Calculate_Result();
-    void Return_Parameter(int index);
+    void Return_Parameter();
     string Head_Parameter();
 };
 
@@ -1007,22 +1016,22 @@ float Child_ML<SVM>::Calculate_Sum_Accuracy(float *&i_accuracy, Machine_Learning
     float out_sum_accuracy=0;
     for(int i=0; i< i_ml->k_fold_value; i++){
         out_sum_accuracy=out_sum_accuracy+i_accuracy[i];
-        Return_Parameter(i);
+        // Return_Parameter(i);
     }
     return out_sum_accuracy;
 }
 
 void Child_ML<SVM>::Calculate_Result(){
-    for(int i=0;i<ml->k_fold_value;i++){
-        confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
-        // confusion_matrix[i]=test_and_save_classifier(model[i], ml->train_data[i], ml->train_responses_int[i], ml->ntrain_samples, 0, ml->filename_to_save,ml->ml_technique);
-        accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
-        sum_accuracy=sum_accuracy+accuracy[i];
-        Return_Parameter(i);
-    }
+    // for(int i=0;i<ml->k_fold_value;i++){
+    //     confusion_matrix[i]=test_and_save_classifier(model[i], ml->test_data[i], ml->test_responses_int[i], ml->ntest_samples, 0, ml->filename_to_save,ml->ml_technique);
+    //     // confusion_matrix[i]=test_and_save_classifier(model[i], ml->train_data[i], ml->train_responses_int[i], ml->ntrain_samples, 0, ml->filename_to_save,ml->ml_technique);
+    //     accuracy[i]=Accuracy_Calculation(confusion_matrix[i]);
+    //     sum_accuracy=sum_accuracy+accuracy[i];
+    //     Return_Parameter(i);
+    // }
 }
-void Child_ML<SVM>::Return_Parameter(int index){
-    // sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count, accuracy[index]);  //header
+void Child_ML<SVM>::Return_Parameter(){
+    // sprintf(result_buffer[index], "%d, %d, %d, %f, %d, %d, %f \n", index, max_depth, min_sample_count, regression_accuracy, tc_value,ml->class_count);  //header
     
 }
 
@@ -1056,11 +1065,11 @@ public:
     void Write_Header();
     string Create_file_path(string file_path, string file_name, string number_of_CE);
     bool The_File_Process();
-    bool The_File_Collection_Process(float i_mean);
+    bool The_File_Collection_Process(float i_mean_test, float i_sta_dev_test, float i_mean_train, float i_sta_dev_train);
     bool The_Best_Process(float i_mean, float i_variance, float i_sta_dev, int i_k_fold_value,Mat *&i_con_mat, string type);
 };
 
-Write_File::Write_File(Parent_ML *i_final_ml, Machine_Learning_Data_Preparation *i_prepared_data,string i_number_of_CE){
+Write_File::Write_File(Parent_ML *i_final_ml, Machine_Learning_Data_Preparation *i_prepared_data, string i_number_of_CE){
     final_ml=i_final_ml;
     prepared_data=i_prepared_data;
     // mean=final_ml->mean;
@@ -1068,8 +1077,8 @@ Write_File::Write_File(Parent_ML *i_final_ml, Machine_Learning_Data_Preparation 
     // sta_dev=final_ml->sta_dev;
     // k_fold_value=prepared_data->k_fold_value;
     // con_mat=final_ml->confusion_matrix;
-    buffer_file=final_ml->result_buffer;
-
+    // buffer_file=final_ml->result_buffer;
+    // cout<<"i_number_of_CE: "<<i_number_of_CE<<endl;
     string file_path="resource/rf/";
     file_full_path=Create_file_path(file_path,"min_sample_count_",i_number_of_CE);
     file_the_best_full_path=Create_file_path(file_path,"Calculate_standard_deviation_",i_number_of_CE);
@@ -1078,6 +1087,7 @@ Write_File::Write_File(Parent_ML *i_final_ml, Machine_Learning_Data_Preparation 
     file.open(file_full_path, std::ios_base::app);
     file_collection.open(file_collection_full_path, std::ios_base::app);
     file_the_best.open(file_the_best_full_path, std::ios_base::app);
+
 }
 
 Write_File::~Write_File(){
@@ -1088,13 +1098,19 @@ Write_File::~Write_File(){
 void Write_File::Write_Header(){
     file_collection<<"#MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy";
     file_collection<<endl;
-    file<<final_ml->Head_Parameter();
+    // file<<final_ml->Head_Parameter();
     file<<endl;
 }
 void Write_File::Main_Process(){
     // The_Best_Process();
-    // The_File_Collection_Process(final_ml->mean_test);
+    The_File_Collection_Process(final_ml->mean_test, final_ml->sta_dev_test, final_ml->mean_train, final_ml->sta_dev_train);
     // The_File_Process();
+
+    // cout<<"final_ml->mean_test: "<<final_ml->mean_test<<endl;
+    // cout<<"final_ml->variance_test: "<<final_ml->variance_test<<endl;
+    // cout<<"final_ml->sta_dev_test: "<<final_ml->sta_dev_test<<endl;
+    // cout<<"prepared_data->k_fold_value: "<<prepared_data->k_fold_value<<endl;
+    // cout<<"final_ml->confusion_matrix_test: "<<final_ml->confusion_matrix_test<<endl;
 
 
     The_Best_Process(final_ml->mean_test, final_ml->variance_test, final_ml->sta_dev_test, 
@@ -1108,6 +1124,7 @@ string Write_File::Create_file_path(string file_path, string file_name, string n
     string file_name_extension=".txt";
     string full_file_name=file_name+number_of_CE+file_name_extension;
     string temp_file_full_path=file_path+full_file_name;
+    cout<<"temp_file_full_path: "<<temp_file_full_path<<endl; 
     return temp_file_full_path;
 }
 
@@ -1118,10 +1135,13 @@ bool Write_File::The_File_Process(){
     return true;        
 }
 
-bool Write_File::The_File_Collection_Process(float i_mean){
-    // char mse_buffer[70];
-    // sprintf(mse_buffer, "%1.f ± %1.f%% \n", mean*100,sta_dev*100);
+bool Write_File::The_File_Collection_Process(float i_mean_test, float i_sta_dev_test, float i_mean_train, float i_sta_dev_train){
+    // char mse_buffer_test[70];
+    // char mse_buffer_train[70];
+    // sprintf(mse_buffer_test, "%1.f ± %1.f%% \n", i_mean_test*100, i_sta_dev_test*100);
+    // sprintf(mse_buffer_train, "%1.f ± %1.f%% \n", i_mean_train*100, i_sta_dev_train*100);
     // file_collection<<"#Mean, Variance, Sta_dev, Mean Square Error";
+    file_collection<<final_ml->result_buffer;
     // file_collection<<endl;
     // file_collection<<to_string(mean);
     // file_collection<<", ";
@@ -1131,58 +1151,58 @@ bool Write_File::The_File_Collection_Process(float i_mean){
     // file_collection<<", ";
     // file_collection<<mse_buffer;
     // file_collection<<endl;
-    file_collection<<final_ml->final_result_buffer;
-    file_collection<<", ";
-    file_collection<<to_string(i_mean);
-    file_collection<<endl; 
+    // file_collection<<mse_buffer_test;
+    // file_collection<<", ";
+    // file_collection<<to_string(i_mean_test);
+    // file_collection<<endl; 
     
     return true;
 }
 
 bool Write_File::The_Best_Process(float i_mean, float i_variance, float i_sta_dev, int i_k_fold_value, Mat *&i_con_mat, string type){
     char mean_buffer[20],variance_buffer[40],sta_dev_buffer[40],mse_buffer[70];
-    sprintf(mean_buffer, "#mean: %f \n", i_mean);
-    sprintf(variance_buffer, "#variance: %f \n", i_variance);
-    sprintf(sta_dev_buffer, "#sta_dev: %f \n", i_sta_dev);  //header
-    sprintf(mse_buffer, "#Mean Square Error: %1.f ± %1.f%% \n", i_mean*100, i_sta_dev*100);
+    // sprintf(mean_buffer, "#mean: %f \n", i_mean);
+    // sprintf(variance_buffer, "#variance: %f \n", i_variance);
+    // sprintf(sta_dev_buffer, "#sta_dev: %f \n", i_sta_dev);  //header
+    // sprintf(mse_buffer, "#Mean Square Error: %1.f ± %1.f%% \n", i_mean*100, i_sta_dev*100);
     // cout<<"start Best"<<endl;
     // cout<<"mean:"<<mean_buffer<<endl;
     // cout<<"variance_buffer:"<<variance_buffer<<endl;
     // cout<<"sta_dev_buffer:"<<sta_dev_buffer<<endl;
     // cout<<"mse_buffer:"<<mse_buffer<<endl;
     // cout<<"end Best"<<endl;
-    file_the_best << "----------";
-    file_the_best << type;
-    file_the_best << "----------\n";
-    if (file_the_best){
-        // file_the_best<<"\n\n";    
-        file_the_best<<mean_buffer;
-        file_the_best<<variance_buffer;
-        file_the_best<<sta_dev_buffer;
-        file_the_best<<mse_buffer;
-        file_the_best<<"\n\n";
-        file_the_best<<"#Confusion Matrix\n";
-        for(int i=0; i<i_k_fold_value; i++){
-            char buffer[50];
-            sprintf(buffer, "#k=%d\n", i);  //header
-            file_the_best<<buffer;
-            file_the_best<<"#";
-            file_the_best<<i_con_mat[i].at<int>(0,0);
-            file_the_best<<", ";
-            file_the_best<<i_con_mat[i].at<int>(0,1);
-            file_the_best<<"\n";
-            file_the_best<<"#";
-            file_the_best<<i_con_mat[i].at<int>(1,0);
-            file_the_best<<", ";
-            file_the_best<<i_con_mat[i].at<int>(1,1);
-            file_the_best<<"\n\n";
-        }
+    // file_the_best << "----------";
+    // file_the_best << type;
+    // file_the_best << "----------\n";
+    // if (file_the_best){
+    //     // file_the_best<<"\n\n";    
+    //     file_the_best<<mean_buffer;
+    //     file_the_best<<variance_buffer;
+    //     file_the_best<<sta_dev_buffer;
+    //     file_the_best<<mse_buffer;
+    //     file_the_best<<"\n\n";
+    //     file_the_best<<"#Confusion Matrix\n";
+        // for(int i=0; i<i_k_fold_value; i++){
+        //     char buffer[50];
+        //     sprintf(buffer, "#k=%d\n", i);  //header
+        //     file_the_best<<buffer;
+        //     file_the_best<<"#";
+        //     file_the_best<<i_con_mat[i].at<int>(0,0);
+        //     file_the_best<<", ";
+        //     file_the_best<<i_con_mat[i].at<int>(0,1);
+        //     file_the_best<<"\n";
+        //     file_the_best<<"#";
+        //     file_the_best<<i_con_mat[i].at<int>(1,0);
+        //     file_the_best<<", ";
+        //     file_the_best<<i_con_mat[i].at<int>(1,1);
+        //     file_the_best<<"\n\n";
+        // }
             
-    }
-    file_the_best << "--------";
-    file_the_best << type;
-    file_the_best << " end";
-    file_the_best << "--------\n";
+    // }
+    // file_the_best << "--------";
+    // file_the_best << type;
+    // file_the_best << " end";
+    // file_the_best << "--------\n";
     return 0;
 }
 #endif // end of LOAD_AND_SAVE_ML_H

@@ -1,8 +1,0 @@
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy
-Index, MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy

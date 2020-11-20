@@ -406,7 +406,7 @@ load_and_save_ml( const string& data_filename,
     int max_categories=2;
 
     while(1){
-        int tc_value=50;
+        int tc_value=5;
         for(int i=0;i<10;i++){
             Parent_ML *final_ml;
             if(ml_technique==0){
@@ -421,14 +421,15 @@ load_and_save_ml( const string& data_filename,
                 return false;
             }
 
-
             final_ml->Main_Process(prepared_data);//doing main process
             
 
             // string numb_ce=to_string(prepared_data->the_number_of_data+1);//check number of CEs
             // string numb_ce=to_string(i);//check number of CEs
+            // cout<<"to_string(min_sample_count): "<<to_string(min_sample_count)<<endl;
             
             Write_File file_write(final_ml,prepared_data,to_string(min_sample_count));//writing file class
+            
             // Write_File file_write(numb_ce);//writing file class
             // cout<<"seg"<<endl;
             // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
