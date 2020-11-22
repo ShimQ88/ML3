@@ -927,7 +927,7 @@ void Child_ML<RTrees>::Return_Parameter(){
 }
 
 string Child_ML<RTrees>::Head_Parameter(){
-    return "MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy, Test_Accuracy, Train_Accuracy";
+    return "MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Test_Accuracy, Train_Accuracy";
 }
 
 template<>
@@ -1062,7 +1062,7 @@ public:
     ~Write_File();
     // void Main_Process(float mean, float variance,float sta_dev,int k_fold_value, Mat con_mat[],char **buffer_file);
     void Main_Process();
-    void Write_Header();
+    void Write_Header(string header);
     string Create_file_path(string file_path, string file_name, string number_of_CE);
     bool The_File_Process();
     bool The_File_Collection_Process(float i_mean_test, float i_sta_dev_test, float i_mean_train, float i_sta_dev_train);
@@ -1080,11 +1080,11 @@ Write_File::Write_File(Parent_ML *i_final_ml, Machine_Learning_Data_Preparation 
     // buffer_file=final_ml->result_buffer;
     // cout<<"i_number_of_CE: "<<i_number_of_CE<<endl;
     string file_path="resource/rf/";
-    file_full_path=Create_file_path(file_path,"min_sample_count_",i_number_of_CE);
+    // file_full_path=Create_file_path(file_path,"min_sample_count_",i_number_of_CE);
     file_the_best_full_path=Create_file_path(file_path,"Calculate_standard_deviation_",i_number_of_CE);
-    file_collection_full_path=Create_file_path(file_path,"accuracy_collection",i_number_of_CE);
+    file_collection_full_path=Create_file_path(file_path,"accuracy_collection_",i_number_of_CE);
 
-    file.open(file_full_path, std::ios_base::app);
+    // file.open(file_full_path, std::ios_base::app);
     file_collection.open(file_collection_full_path, std::ios_base::app);
     file_the_best.open(file_the_best_full_path, std::ios_base::app);
 
@@ -1095,8 +1095,8 @@ Write_File::~Write_File(){
     file_the_best.close();
     file_collection.close();
 }
-void Write_File::Write_Header(){
-    file_collection<<"#MaxDepth, RegressionAccuracy, MaxCategories, TermCritera, ClassCount, Accuracy";
+void Write_File::Write_Header(string header){
+    file_collection<<header;
     file_collection<<endl;
     // file<<final_ml->Head_Parameter();
     file<<endl;
@@ -1161,48 +1161,48 @@ bool Write_File::The_File_Collection_Process(float i_mean_test, float i_sta_dev_
 
 bool Write_File::The_Best_Process(float i_mean, float i_variance, float i_sta_dev, int i_k_fold_value, Mat *&i_con_mat, string type){
     char mean_buffer[20],variance_buffer[40],sta_dev_buffer[40],mse_buffer[70];
-    // sprintf(mean_buffer, "#mean: %f \n", i_mean);
-    // sprintf(variance_buffer, "#variance: %f \n", i_variance);
-    // sprintf(sta_dev_buffer, "#sta_dev: %f \n", i_sta_dev);  //header
-    // sprintf(mse_buffer, "#Mean Square Error: %1.f ± %1.f%% \n", i_mean*100, i_sta_dev*100);
-    // cout<<"start Best"<<endl;
-    // cout<<"mean:"<<mean_buffer<<endl;
-    // cout<<"variance_buffer:"<<variance_buffer<<endl;
-    // cout<<"sta_dev_buffer:"<<sta_dev_buffer<<endl;
-    // cout<<"mse_buffer:"<<mse_buffer<<endl;
-    // cout<<"end Best"<<endl;
-    // file_the_best << "----------";
-    // file_the_best << type;
-    // file_the_best << "----------\n";
-    // if (file_the_best){
-    //     // file_the_best<<"\n\n";    
-    //     file_the_best<<mean_buffer;
-    //     file_the_best<<variance_buffer;
-    //     file_the_best<<sta_dev_buffer;
-    //     file_the_best<<mse_buffer;
-    //     file_the_best<<"\n\n";
-    //     file_the_best<<"#Confusion Matrix\n";
-        // for(int i=0; i<i_k_fold_value; i++){
-        //     char buffer[50];
-        //     sprintf(buffer, "#k=%d\n", i);  //header
-        //     file_the_best<<buffer;
-        //     file_the_best<<"#";
-        //     file_the_best<<i_con_mat[i].at<int>(0,0);
-        //     file_the_best<<", ";
-        //     file_the_best<<i_con_mat[i].at<int>(0,1);
-        //     file_the_best<<"\n";
-        //     file_the_best<<"#";
-        //     file_the_best<<i_con_mat[i].at<int>(1,0);
-        //     file_the_best<<", ";
-        //     file_the_best<<i_con_mat[i].at<int>(1,1);
-        //     file_the_best<<"\n\n";
-        // }
+    sprintf(mean_buffer, "#mean: %f \n", i_mean);
+    sprintf(variance_buffer, "#variance: %f \n", i_variance);
+    sprintf(sta_dev_buffer, "#sta_dev: %f \n", i_sta_dev);  //header
+    sprintf(mse_buffer, "#Mean Square Error: %1.f ± %1.f%% \n", i_mean*100, i_sta_dev*100);
+    cout<<"start Best"<<endl;
+    cout<<"mean:"<<mean_buffer<<endl;
+    cout<<"variance_buffer:"<<variance_buffer<<endl;
+    cout<<"sta_dev_buffer:"<<sta_dev_buffer<<endl;
+    cout<<"mse_buffer:"<<mse_buffer<<endl;
+    cout<<"end Best"<<endl;
+    file_the_best << "----------";
+    file_the_best << type;
+    file_the_best << "----------\n";
+    if (file_the_best){
+        // file_the_best<<"\n\n";    
+        file_the_best<<mean_buffer;
+        file_the_best<<variance_buffer;
+        file_the_best<<sta_dev_buffer;
+        file_the_best<<mse_buffer;
+        file_the_best<<"\n\n";
+        file_the_best<<"#Confusion Matrix\n";
+        for(int i=0; i<i_k_fold_value; i++){
+            char buffer[50];
+            sprintf(buffer, "#k=%d\n", i);  //header
+            file_the_best<<buffer;
+            file_the_best<<"#";
+            file_the_best<<i_con_mat[i].at<int>(0,0);
+            file_the_best<<", ";
+            file_the_best<<i_con_mat[i].at<int>(0,1);
+            file_the_best<<"\n";
+            file_the_best<<"#";
+            file_the_best<<i_con_mat[i].at<int>(1,0);
+            file_the_best<<", ";
+            file_the_best<<i_con_mat[i].at<int>(1,1);
+            file_the_best<<"\n\n";
+        }
             
-    // }
-    // file_the_best << "--------";
-    // file_the_best << type;
-    // file_the_best << " end";
-    // file_the_best << "--------\n";
+    }
+    file_the_best << "--------";
+    file_the_best << type;
+    file_the_best << " end";
+    file_the_best << "--------\n";
     return 0;
 }
 #endif // end of LOAD_AND_SAVE_ML_H

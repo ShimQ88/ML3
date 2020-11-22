@@ -434,7 +434,7 @@ load_and_save_ml( const string& data_filename,
             // cout<<"seg"<<endl;
             // cout<<"final_ml->variance: "<<final_ml->variance<<endl;
             if(i==0){
-                file_write.Write_Header();
+                file_write.Write_Header(final_ml->Head_Parameter());
             }
             file_write.Main_Process();
             tc_value=tc_value+5;

@@ -11,7 +11,7 @@
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
 # set terminal qt 0 font "Sans,9"
-# set output 'graph/Nov.out'
+# set output
 unset clip points
 set clip one
 unset clip two
@@ -126,13 +126,13 @@ set xlabel "Count"
 set xlabel  font "" textcolor lt -1 norotate
 set x2label "" 
 set x2label  font "" textcolor lt -1 norotate
-set xrange [ -1.00000 : * ] noreverse writeback
+set xrange [ 0.00000 : 70.0000 ] noreverse nowriteback
 set x2range [ * : * ] noreverse writeback
 set ylabel "Accuracy" 
 set ylabel  font "" textcolor lt -1 rotate
 set y2label "" 
 set y2label  font "" textcolor lt -1 rotate
-set yrange [ 0.00000 : 1.00000 ] noreverse nowriteback
+set yrange [ 0.00000 : 100.000 ] noreverse nowriteback
 set y2range [ * : * ] noreverse writeback
 set zlabel "" 
 set zlabel  font "" textcolor lt -1 norotate
@@ -164,11 +164,10 @@ set loadpath
 set fontpath 
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
-check_valid_column(c) = valid(c) ? check_valid_column(c + 1) : c - 1
 GNUTERM = "qt"
 CE10 = 10
 CE15 = 15
 CE20 = 20
-## Last datafile plotted: "<(sed -n '2,6p' resource/rf/accuracy_collection0.txt )"
-
+## Last datafile plotted: "<(sed -n '9,13p' resource/rf/accuracy_collection5.txt )"
+plot "<(sed -n '2,10p' resource/rf/accuracy_collection5.txt )" using 4:7 smooth unique with lp title 'Test' linestyle 15,"<(sed -n '9,13p' resource/rf/accuracy_collection5.txt )" using 4:7 smooth unique with lp title 'Train' linestyle 2,
 #    EOF
