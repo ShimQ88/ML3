@@ -34,8 +34,6 @@ using namespace chrono;
 #define pixelR(image,x,y) image.data[image.step[0]*y+image.step[1]*x+2]	//Red color space
 
 
-
-
 int determine_frame_size(Mat input, Point obj_center, int frame_size, int append_size ){
 	bool is_tri=false;
 	// cout<<"input.size(): "<<input.size()<<endl;
@@ -326,6 +324,7 @@ public:
 	Mat get_kuhawara_img(){
 		return kuhawara_img;
 	}
+
 	
 };
 
@@ -388,10 +387,25 @@ public:
 		  	temp_image[j]=imread(glob_result.gl_pathv[curr_index+j],1);
 		  	image[j].main(temp_image[j]);
 		}
+
+		Mat back_back=create_background(temp_image, total_numb);
+		// resize(back_back,back_back,back_back.size()/2);
+		// imshow("test",back_back);
+		// waitKey(0);
+
 		
 		subtracted_frame=sub_prev_and_next_images(image, target_index);//need to change
 		// subtracted_frame=sub_prev_and_next_images_first_ver(image, target_index);
 
+		cvtColor(temp_image[target_index], temp_image[target_index], COLOR_BGR2GRAY);
+
+		Mat sub_f=back_back-temp_image[target_index];
+
+		resize(sub_f,sub_f,sub_f.size()/2);
+		imshow("test",sub_f);
+		waitKey(0);
+
+		// return;
 
 		// thresholding_image(subtracted_frame, 50,true,0);
 		cv::threshold(subtracted_frame, subtracted_frame, 0, 255, THRESH_BINARY | THRESH_OTSU);
@@ -672,6 +686,29 @@ public:
 		return to;
 	}
 	string* get_CEs(){return p_CE;}
+	Mat create_background(Mat *in_img, int the_number_of_imgs){
+		Mat output_img=Mat::zeros(in_img[0].size(),IMREAD_GRAYSCALE);
+		float temp_pixel[the_number_of_imgs];
+		float final_pixel;
+		for(int i=0;i<in_img[0].cols;i++){
+			for(int j=0;j<in_img[0].rows;j++){
+				// float temp_pixel=0;
+				final_pixel=0;
+				for(int z=0;z<the_number_of_imgs;z++){//process add all pixel value
+					// temp_pixel=temp_pixel+(float)Mpixel(in_img[z],i,j);	
+					temp_pixel[z]=(float)Mpixel(in_img[z],i,j);
+					final_pixel=final_pixel+temp_pixel[z];
+					cout<<j<<" pixel:"<<temp_pixel[z]<<endl;
+
+				}
+				getchar();
+				// temp_pixel=temp_pixel/the_number_of_imgs;//find the ave number
+				final_pixel=final_pixel/the_number_of_imgs;//find the ave number
+				Mpixel(output_img,i,j)=final_pixel;
+			}
+		}
+		return output_img;
+	}
 	
 };
 

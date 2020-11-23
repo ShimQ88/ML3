@@ -1,11 +1,12 @@
-path_of_file=~/Desktop/rodents_data
+# path_of_file=~/Desktop/rodents_data
+path_of_file=~/Desktop/test_img
 # path_of_file2=~/Desktop/ML2/sample_img
 # path_of_file=/home/q/Desktop/andre_2/other
 # path_of_file=/home/q/Desktop/andre_file
 # path_of_file=path_of_file3
 echo $path_of_file
 # The first process
-# ./main -detect $path_of_file
+./main -detect $path_of_file
 
 #read index
 value=`cat ROI_images/index.txt`
